@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Block, Accent } from "@/lib/types";
 import { imgSrc } from "@/lib/content";
+import Explainer from "@/components/anim/Explainer";
 
 const H = (h: string) => ({ dangerouslySetInnerHTML: { __html: h } });
 const TAG: Record<Accent, string> = { model: "mental model", tool: "tool", verify: "verify", think: "thinking", tip: "tip" };
@@ -12,6 +13,8 @@ export default function Blocks({ blocks, courseSlug }: { blocks: Block[]; course
     <div className="lesson font-serif text-[1.06rem] leading-[1.68] text-ink">
       {blocks.map((b, i) => {
         switch (b.t) {
+          case "anim":
+            return <Explainer key={i} name={b.name} caption={b.cap} />;
           case "lead":
             return <p key={i} className="lead" {...H(b.h)} />;
           case "p":

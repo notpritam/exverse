@@ -38,15 +38,8 @@ export default async function Lesson({ params }: { params: Promise<Params> }) {
   const part = partOf(course, s.part);
 
   return (
-    <main className="mx-auto max-w-measure px-6 py-12">
-      <Link
-        href={`/learn/${slug}`}
-        className="inline-flex items-center gap-2 font-mono text-xs text-muted transition-colors hover:text-ink"
-      >
-        ← {course.meta.title} · roadmap
-      </Link>
-
-      <div className="lz-head mt-6">
+    <article className="mx-auto max-w-3xl px-6 py-10 lg:px-12 lg:py-14">
+      <div className="lz-head">
         <span className="chap">Ch {chap}</span>
         <span className="stamp">◷ {s.time}</span>
         <span className="font-display text-sm text-muted">{part?.title}</span>
@@ -96,6 +89,6 @@ export default async function Lesson({ params }: { params: Promise<Params> }) {
           </Link>
         )}
       </nav>
-    </main>
+    </article>
   );
 }

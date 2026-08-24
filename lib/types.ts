@@ -11,7 +11,8 @@ export type Block =
   | { t: "steps"; title?: string; items: string[] }
   | { t: "list"; items: string[] }
   | { t: "code"; file?: string; h: string }
-  | { t: "table"; head: string[]; rows: string[][] };
+  | { t: "table"; head: string[]; rows: string[][] }
+  | { t: "anim"; name: string; cap?: string };
 
 export type Flashcard = { type: "flash"; q: string; a: string };
 export type MCQ = { type: "mcq"; q: string; opts: string[]; correct: number; why?: string };

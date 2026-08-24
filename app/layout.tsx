@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Newsreader, JetBrains_Mono } from "next/font/google";
+import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
 const display = Space_Grotesk({
@@ -53,7 +54,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
-      <body className="bg-grid min-h-screen antialiased">{children}</body>
+      <body className="bg-grid min-h-screen antialiased">
+        <SiteHeader />
+        {children}
+      </body>
     </html>
   );
 }

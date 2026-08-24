@@ -1,0 +1,1964 @@
+{
+  "meta": {
+    "title": "How I Use LLMs",
+    "author": "Andrej Karpathy",
+    "when": "Feb 2025",
+    "duration": "2h06m",
+    "tagline": "A deep, screen-by-screen course"
+  },
+  "parts": [
+    {
+      "n": "I",
+      "id": "p1",
+      "title": "The Mental Model",
+      "blurb": "What you're actually talking to — and how to hold it in your head so nothing else confuses you."
+    },
+    {
+      "n": "II",
+      "id": "p2",
+      "title": "Choose & Steer the Model",
+      "blurb": "Pick the right brain for the job, and know when to let it stop and think."
+    },
+    {
+      "n": "III",
+      "id": "p3",
+      "title": "Give It Tools",
+      "blurb": "The leap from a sealed zip file to something that can search, run code, and act."
+    },
+    {
+      "n": "IV",
+      "id": "p4",
+      "title": "Beyond Text — Modalities",
+      "blurb": "Speak, listen, see, show, and point the camera. Real audio, images, and video."
+    },
+    {
+      "n": "V",
+      "id": "p5",
+      "title": "Make It Yours",
+      "blurb": "Memory, custom instructions, and tiny custom apps that save you the same prompt twice."
+    },
+    {
+      "n": "VI",
+      "id": "p6",
+      "title": "The Whole Zoo",
+      "blurb": "Zoom all the way out: the complete map and a checklist you can actually use."
+    }
+  ],
+  "sections": [
+    {
+      "id": "zip-file",
+      "part": 1,
+      "time": "00:00",
+      "title": "You're talking to a zip file",
+      "tagline": "A lossy, probabilistic compression of the whole internet — and nothing else, by default.",
+      "mental": "Everything else in this course sits on one picture. A <b>new chat</b> is an empty token stream — you and the model take turns writing tokens into it, and that stream is the <b>context window</b>, the model's working memory. The thing writing back is a ~1&nbsp;terabyte file on a disk: about a <b>trillion neural-net parameters</b> that compressed the internet into a <b>lossy, probabilistic \"zip file.\"</b> By default it is sealed — no calculator, no browser, no memory of last week. Steering that file, and breaking it out of the box, is the whole rest of the course.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "When you click <b>New Chat</b>, you begin a one-dimensional sequence of tokens. You write some; you hit enter; control passes to the model, which writes its own tokens back until it emits a special \"I'm done\" token and hands the turn back to you. Together you build out the stream."
+        },
+        {
+          "t": "p",
+          "h": "That stream is the <span class=\"term\">context window</span> — \"kind of like the working memory of this conversation.\" Anything inside it is directly accessible to the model. Anything outside it might as well not exist."
+        },
+        {
+          "t": "fig",
+          "src": "chatgpt-blank.jpg",
+          "url": "chatgpt.com",
+          "alt": "A blank ChatGPT screen reading 'What can I help with?'",
+          "cap": "<b>The empty stream.</b> A fresh chat is a blank context window. Nothing here yet but the invitation to add tokens."
+        },
+        {
+          "t": "callout",
+          "k": "model",
+          "title": "Two stages built this file",
+          "h": "<b>Pre-training</b> chops all of the internet into tokens and compresses them into the parameters — roughly a 1&nbsp;TB / 1&nbsp;trillion-parameter file. It costs tens of millions of dollars and months of compute, so it happens rarely. <b>Post-training</b> then swaps the data for human-written conversations, giving the file the <em>persona of an assistant</em> — \"attaching a smiley face to the zip file.\""
+        },
+        {
+          "t": "quote",
+          "ts": "00:24",
+          "h": "The zip file is lossy and probabilistic… because we can't possibly represent all of internet in just one terabyte. So we just kind of get the gestalt or the vibes inside this zip file."
+        },
+        {
+          "t": "callout",
+          "k": "verify",
+          "title": "It has a knowledge cutoff",
+          "h": "Because pre-training is rare and expensive, the model's knowledge is \"a little bit out of date.\" Ask about last week and it simply isn't in the file. Hold onto this — it's the reason half of Part&nbsp;III (tools) exists."
+        },
+        {
+          "t": "p",
+          "h": "So the default entity is <b>fully self-contained</b>: a file that turns tokens into tokens, carrying knowledge from pre-training and style from post-training. That's it."
+        },
+        {
+          "t": "quote",
+          "ts": "00:53",
+          "h": "There's no calculator. There's no computer and Python interpreter. There's no worldwide-web browsing. There's none of that. There's no tool use yet… You're talking to a zip file."
+        }
+      ],
+      "takeaways": [
+        "New chat = empty <b>token stream</b> = the <b>context window</b> = the model's working memory.",
+        "The model is a ~1&nbsp;TB, ~1&nbsp;trillion-parameter <b>lossy, probabilistic compression of the internet</b>.",
+        "<b>Pre-training</b> gives it knowledge; <b>post-training</b> gives it the assistant persona.",
+        "By default it's <b>sealed</b> — no tools — and its knowledge has a <b>cutoff</b>."
+      ],
+      "exercises": [
+        {
+          "t": "Feel the recall",
+          "p": "Open a fresh chat and ask a common, stable fact (“how many milligrams of caffeine in a shot of espresso?”). Notice you're reading its <em>compressed memory of the internet</em>, not a lookup.",
+          "hint": "If it answered instantly with no “searching…”, that was pure zip-file recall — vivid because the fact is all over the internet."
+        },
+        {
+          "t": "Hit the cutoff",
+          "p": "Now ask about something from the last two weeks. Watch it hedge, guess, or say it doesn't know.",
+          "hint": "That wall is the knowledge cutoff. In Part III you'll hand it a search tool so it can go get the answer."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "flash",
+          "q": "What do “lossy” and “probabilistic” actually mean for the model's knowledge?",
+          "a": "It didn't store the internet verbatim — it kept a compressed “gestalt.” Frequently-repeated facts are recalled well; rare ones are fuzzy or invented. Every answer is a statistical best-guess, not a retrieval."
+        },
+        {
+          "type": "mcq",
+          "q": "Which pair correctly maps the two training stages?",
+          "opts": [
+            "Pre-training → persona; Post-training → knowledge",
+            "Pre-training → knowledge; Post-training → assistant persona",
+            "Both stages add knowledge equally",
+            "Post-training is where web browsing is added"
+          ],
+          "correct": 1,
+          "why": "Pre-training compresses the internet (knowledge); post-training fine-tunes on human conversations to produce the helpful-assistant style. Tools come later and separately."
+        },
+        {
+          "type": "flash",
+          "q": "Why is a freshly-released model already “out of date”?",
+          "a": "Its knowledge is frozen at pre-training time — the knowledge cutoff. Pre-training is too costly to redo often, so anything after that date isn't in the file unless you add it via a tool or the context window."
+        }
+      ]
+    },
+    {
+      "id": "hi-im-chatgpt",
+      "part": 1,
+      "time": "05:20",
+      "title": "“Hi, I'm ChatGPT”",
+      "tagline": "The one-paragraph self-introduction that tells you exactly how to think about it.",
+      "mental": "If the zip file could honestly introduce itself, it would tell you its own limits. Karpathy's summary is the most useful sentence in the whole talk: knowledge from the internet, read once and remembered <b>vaguely</b>, with a personality <b>programmed by example</b>. Frequent things it recalls well; rare things it recalls badly — <b>just like a person</b>.",
+      "blocks": [
+        {
+          "t": "quote",
+          "ts": "05:31",
+          "h": "Hi, I'm ChatGPT. I am a one-terabyte zip file. My knowledge comes from the internet, which I read in its entirety about six months ago, and I only remember vaguely. And my winning personality was programmed by example, by human labelers at OpenAI."
+        },
+        {
+          "t": "fig",
+          "src": "chatgpt-identity.jpg",
+          "url": "excalidraw.com",
+          "alt": "Karpathy's whiteboard with the ChatGPT self-introduction text",
+          "cap": "<b>The honest introduction.</b> Karpathy literally writes it out on the whiteboard next to the zip-file diagram."
+        },
+        {
+          "t": "p",
+          "h": "The practical consequence: the model's confidence is not calibrated to truth, it's calibrated to <b>frequency on the internet</b>. Ask about something discussed everywhere and recall is strong. Ask about something niche and it will still answer confidently — but that answer is a probabilistic reconstruction, and it may be wrong."
+        },
+        {
+          "t": "callout",
+          "k": "tip",
+          "title": "Read every answer through this lens",
+          "h": "Before you trust a reply, ask: <em>is this the kind of thing that's all over the internet?</em> If yes, recall is probably fine. If it's recent, niche, or high-stakes, treat the reply as a first draft and verify."
+        }
+      ],
+      "takeaways": [
+        "Confidence tracks <b>internet frequency</b>, not truth.",
+        "Common facts → strong recall. Rare facts → confident but shaky.",
+        "Personality is <b>programmed by example</b> in post-training — it's a style, not a self."
+      ],
+      "exercises": [
+        {
+          "t": "Frequency test",
+          "p": "Ask the same style of question about (a) a hugely popular topic and (b) something obscure. Compare how specific and how hedged the answers feel.",
+          "hint": "You're probing the “I only remember vaguely” part. Obscurity is where hallucinations breed."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "flash",
+          "q": "Why does the model sound equally confident about common and obscure facts?",
+          "a": "Its output is always a fluent next-token prediction. Fluency is uniform; accuracy is not. Confidence in the prose tells you nothing about whether the underlying fact was well-represented in training."
+        },
+        {
+          "type": "mcq",
+          "q": "“My winning personality was programmed by example.” What does that describe?",
+          "opts": [
+            "Pre-training on the internet",
+            "Post-training on human-written conversations",
+            "A tool the model calls",
+            "The knowledge cutoff"
+          ],
+          "correct": 1,
+          "why": "The assistant persona is instilled in post-training, where human labelers curate example conversations that teach the model how to respond."
+        }
+      ]
+    },
+    {
+      "id": "knowledge-queries",
+      "part": 1,
+      "time": "06:13",
+      "title": "Knowledge queries & when to trust them",
+      "tagline": "Caffeine and cold medicine — real questions, and the exact reasoning for trusting the answer.",
+      "mental": "Karpathy doesn't blindly trust the model and he doesn't blindly distrust it. He runs a quick three-part check: is the knowledge <b>recent?</b> Is it <b>common on the internet?</b> Is it <b>high-stakes?</b> \"Not recent, very common, low stakes\" is the sweet spot where a zip-file answer is fine — and he still glances at the box.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "His two real examples both pass the same test. First: <em>how much caffeine is in one shot of Americano?</em> The model says ~63&nbsp;mg."
+        },
+        {
+          "t": "fig",
+          "src": "caffeine-answer.jpg",
+          "url": "chatgpt.com",
+          "alt": "ChatGPT answering that a single espresso shot has about 63mg of caffeine",
+          "cap": "<b>A safe knowledge query.</b> Not recent, extremely common online, low stakes — good recall expected. He can still spot-check a primary source."
+        },
+        {
+          "t": "p",
+          "h": "Second: he has a runny nose, asks for meds, then asks whether <em>DayQuil or NyQuil</em> would help. The model reads out the ingredients and reasons about each — and here's the tell:"
+        },
+        {
+          "t": "quote",
+          "ts": "08:26",
+          "h": "I actually took out the box and I looked at the ingredients and I made sure that NyQuil's ingredients are exactly these… because I don't always fully trust what's coming out here."
+        },
+        {
+          "t": "fig",
+          "src": "dayquil-nyquil.jpg",
+          "url": "chatgpt.com",
+          "alt": "ChatGPT discussing DayQuil and NyQuil ingredients for a runny nose",
+          "cap": "<b>Trust, then verify.</b> Common meds ⇒ good recall — but he still checks the physical box, because the answer is a statistical recollection, not a database read."
+        },
+        {
+          "t": "callout",
+          "k": "verify",
+          "title": "The three-question gate",
+          "h": "Before trusting a bare (tool-less) answer: <b>1) Recent?</b> If yes, it may not be in the file. <b>2) Common online?</b> If no, recall is weak. <b>3) High-stakes?</b> If yes, verify regardless. Caffeine and cold medicine pass on all three — so a quick sanity check is enough."
+        }
+      ],
+      "takeaways": [
+        "Use the gate: <b>recency, commonness, stakes.</b>",
+        "The model's answer is a <b>statistical recollection</b>, not a lookup — even when it's right.",
+        "Low-stakes + common + not-recent = trust with a glance."
+      ],
+      "exercises": [
+        {
+          "t": "Run the gate",
+          "p": "Take three questions you'd ask an LLM this week. For each, score it on recency / commonness / stakes, and decide: trust it, verify it, or reach for a tool.",
+          "hint": "Anything scoring “recent” or “high-stakes” should not rest on bare recall — that's your cue for search (Part III)."
+        },
+        {
+          "t": "Check the box",
+          "p": "Ask about the ingredients or spec of a physical product you own, then compare against the actual label.",
+          "hint": "This is exactly Karpathy's NyQuil move — calibrating how much to trust recall on this kind of question."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "Which query is <em>least</em> suited to a bare, tool-less answer?",
+          "opts": [
+            "How many ml in a US cup?",
+            "What changed in this week's product launch?",
+            "Who wrote Pride and Prejudice?",
+            "Roughly how much caffeine in espresso?"
+          ],
+          "correct": 1,
+          "why": "“This week” fails the recency test — it's after the knowledge cutoff and needs a search tool. The others are stable, common facts."
+        },
+        {
+          "type": "flash",
+          "q": "He got a correct answer about NyQuil — so why did he still check the box?",
+          "a": "Correctness of one answer doesn't change what the model is: a probabilistic recollection. On anything touching health he verifies against a primary source out of habit, because the model gives no guarantee."
+        }
+      ]
+    },
+    {
+      "id": "context-window",
+      "part": 1,
+      "time": "09:33",
+      "title": "Keep the context window clean",
+      "tagline": "Tokens are a precious resource. Start a new chat the moment you switch topics.",
+      "mental": "The context window is working memory — and it's <b>expensive in two ways</b>. Too many irrelevant tokens <b>distract</b> the model and lower accuracy; more tokens also cost slightly more and run slightly slower per step. So treat the window as precious: keep it short, keep it relevant, and <b>wipe it</b> (new chat) whenever the old tokens stop helping.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "As you chat, the stream only grows. When you change subjects, those old tokens aren't just useless — they're a tax."
+        },
+        {
+          "t": "callout",
+          "k": "model",
+          "title": "Why long windows hurt",
+          "h": "<b>Distraction:</b> \"the model might be distracted by all the tokens in the past\" and lose accuracy. <b>Cost & speed:</b> \"the more tokens are in the window, the more expensive it is… to sample the next token,\" so it slows down. A bloated window is worse <em>and</em> pricier."
+        },
+        {
+          "t": "quote",
+          "ts": "10:49",
+          "h": "Think of the tokens in the context window as a precious resource… don't overload it with irrelevant information and keep it as short as you can. And you can expect that to work faster and slightly better."
+        },
+        {
+          "t": "p",
+          "h": "The fix is almost free and habitual: <b>switch topic → start a new chat.</b> You reset the window to zero and hand the model a clean desk. Only keep prior tokens around when they're genuinely relevant to what's next."
+        },
+        {
+          "t": "callout",
+          "k": "tip",
+          "title": "A cheap habit with a real payoff",
+          "h": "New-chat-on-topic-switch costs you one click and buys faster, sharper answers. It also keeps you from the trap of a mega-thread where the model is quietly anchored to something you asked an hour ago."
+        }
+      ],
+      "takeaways": [
+        "The window is <b>working memory</b> — and a metered resource.",
+        "Junk tokens cause <b>distraction</b> (lower accuracy) and <b>cost/latency</b>.",
+        "Habit: <b>new chat when the topic changes.</b>"
+      ],
+      "exercises": [
+        {
+          "t": "Reset reflex",
+          "p": "For the next day, start a brand-new chat every time you switch to an unrelated task, instead of continuing one long thread. Notice the speed and focus.",
+          "hint": "You're minimising irrelevant tokens — the single easiest accuracy win in the whole talk."
+        },
+        {
+          "t": "Watch the drift",
+          "p": "In a long, meandering thread, ask a question unrelated to the last 20 messages and see if the answer gets subtly colored by earlier context.",
+          "hint": "That coloring is the “distraction” cost. A fresh window removes it entirely."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "You finish debugging code and want a dinner recipe. Best move?",
+          "opts": [
+            "Ask in the same thread to “save context”",
+            "Start a new chat",
+            "Paste the code again first",
+            "Switch to a bigger model"
+          ],
+          "correct": 1,
+          "why": "The debugging tokens are pure noise for a recipe — they can distract the model and cost more. Wipe the window with a new chat."
+        },
+        {
+          "type": "flash",
+          "q": "Name the two distinct costs of a bloated context window.",
+          "a": "(1) Distraction — irrelevant tokens can pull the model off and reduce accuracy. (2) Compute — every extra token makes sampling the next token a bit slower and more expensive."
+        }
+      ]
+    },
+    {
+      "id": "models-and-tiers",
+      "part": 2,
+      "time": "11:16",
+      "title": "Know your model & pricing tiers",
+      "tagline": "Which brain you're using is mostly a function of what you pay — so pick deliberately.",
+      "mental": "There isn't \"an LLM.\" There's a ladder of models per provider, and <b>the tier you pay for silently decides which brain answers you</b>. Bigger models cost more to run, so they cost more to use — but they're smarter, more knowledgeable, and hallucinate less. Know which rung you're on, and for anything that matters, climb it. Then, because each provider has quirks, ask several — the \"<b>LLM council</b>.\"",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "Top-left of every app is a model selector. Logged out, you may be handed a smaller, \"dumber\" model without being told. So the first habit is simply: <b>know what you're using.</b>"
+        },
+        {
+          "t": "fig",
+          "src": "pricing-tiers.jpg",
+          "url": "openai.com/chatgpt/pricing",
+          "alt": "ChatGPT pricing page showing Free, Plus and Pro tiers",
+          "cap": "<b>The ladder.</b> Free (small model, e.g. 4o-mini), Plus (~$20/mo, flagship with limits), Pro (~$200/mo, unlimited + extras). The tier is the model."
+        },
+        {
+          "t": "callout",
+          "k": "model",
+          "title": "Bigger = smarter, but pricier",
+          "h": "Larger models have \"a lot more world knowledge,\" better and more creative writing, and hallucinate less. Smaller ones are cheaper and faster but \"not going to be as creative… will make mistakes.\" Match the model to the stakes of your task."
+        },
+        {
+          "t": "p",
+          "h": "This ladder repeats everywhere: Claude (Haiku → Sonnet → …), Gemini (Flash → Pro), Grok (2 → 3). Don't ask Grok&nbsp;2 what Grok&nbsp;3 could answer. Pay enough to reach the top rung <em>for the work you actually do.</em></p>"
+        },
+        {
+          "t": "fig",
+          "src": "claude-city.jpg",
+          "url": "claude.ai",
+          "alt": "Claude recommending Zermatt, Switzerland as a travel destination",
+          "cap": "<b>Same question, many minds.</b> He asks Claude for a city (Zermatt), then asks Gemini the same thing (also Zermatt). Cross-checking is a feature, not indecision."
+        },
+        {
+          "t": "quote",
+          "ts": "15:58",
+          "h": "I kind of refer to all these models as my LLM council… If I'm trying to figure out where to go on a vacation, I will ask all of them."
+        }
+      ],
+      "takeaways": [
+        "The <b>pricing tier chooses your model</b> — often invisibly.",
+        "Bigger models: more knowledge, better writing, fewer hallucinations, higher cost.",
+        "For real work, pay for the top rung; for trivia, the cheap rung is fine.",
+        "Consult an <b>LLM council</b> — ask Claude, Gemini, Grok the same thing."
+      ],
+      "exercises": [
+        {
+          "t": "Find your rung",
+          "p": "Open your main app and check the model selector. What exact model is answering you right now? Is it the flagship or a mini?",
+          "hint": "Logged-out or free tiers often hide this. If you can't tell, assume you're on a smaller model."
+        },
+        {
+          "t": "Convene a council",
+          "p": "Take one open-ended question (travel, a book pick, a naming decision) and ask three different providers. Compare tone, specificity, and where they agree.",
+          "hint": "Agreement across independent models is a decent confidence signal; divergence tells you where to dig."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "You're doing professional work and quality matters. What does Karpathy advise?",
+          "opts": [
+            "Always use the free tier to save money",
+            "Pay for the top-tier model for the tasks that matter",
+            "Only ever use one provider",
+            "Avoid the model selector"
+          ],
+          "correct": 1,
+          "why": "He pays for Pro because access to powerful models is cheap relative to the value in professional work. Match spend to stakes."
+        },
+        {
+          "type": "flash",
+          "q": "What is the “LLM council” and why use it?",
+          "a": "Asking the same question across several providers/models. Each has different strengths, tools, and blind spots, so triangulating their answers raises your confidence and surfaces disagreements worth investigating."
+        }
+      ]
+    },
+    {
+      "id": "thinking-models",
+      "part": 2,
+      "time": "16:11",
+      "title": "Thinking (reasoning) models",
+      "tagline": "A third training stage that lets the model stop and reason — worth the wait on hard problems.",
+      "mental": "After pre- and post-training comes a third stage: <b>reinforcement learning</b>, where the model practices on piles of math and code problems and <b>discovers its own thinking strategies</b> — trying ideas, backtracking, revisiting assumptions. The result is a \"thinking model\": give it a hard problem and it emits a long internal monologue for seconds or minutes before answering. Slower, but markedly more accurate where it counts.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "Reinforcement learning is where the model gets to practice, like doing every exercise in the back of the textbook. In that practice it finds thinking strategies no human labeler could hand-script."
+        },
+        {
+          "t": "callout",
+          "k": "think",
+          "title": "When to reach for thinking",
+          "h": "Big wins on <b>math, code, and genuinely hard reasoning</b>. Little benefit on simple asks (travel ideas, casual writing) — you'd just wait longer for the same thing. Karpathy's rule: try the fast model first; if you suspect the answer could be better, switch to a thinking model and let it cook."
+        },
+        {
+          "t": "p",
+          "h": "His concrete case: a gradient-check bug. Plain GPT-4o listed plausible-but-wrong things to double-check and didn't solve it. Switched to a thinking model, it churned for ~a minute and found the real bug — mismatched parameter packing."
+        },
+        {
+          "t": "fig",
+          "src": "gradient-debug.jpg",
+          "url": "chatgpt.com",
+          "alt": "A thinking model working through a gradient-check bug in code",
+          "cap": "<b>The payoff of patience.</b> Same prompt, thinking model: a minute of reasoning, then the correct fix that the non-thinking model missed."
+        },
+        {
+          "t": "quote",
+          "ts": "23:05",
+          "h": "There exists a class of models that we call thinking models… most effective for difficult problems in math and code. In those kinds of cases, they can push up the accuracy of your performance."
+        },
+        {
+          "t": "callout",
+          "k": "tip",
+          "title": "Find the switch",
+          "h": "Naming is a mess. OpenAI's thinking models start with “o” (o1, o3-mini, o3-mini-high, o1-pro). Grok has a <b>Think</b> toggle. Perplexity hosts DeepSeek-R1 and shows its raw thoughts. Look for a “think / reason” control — it's the same idea everywhere."
+        },
+        {
+          "t": "fig",
+          "src": "grok-greeting.jpg",
+          "url": "grok.com",
+          "alt": "Grok greeting Andrej Karpathy with a Think toggle",
+          "cap": "<b>The Think toggle.</b> On Grok, flip “Think” before sending and it switches to the reasoning model under the hood."
+        }
+      ],
+      "takeaways": [
+        "Thinking models come from a <b>third stage: reinforcement learning</b>.",
+        "They <b>emit a long internal monologue</b> — slower, but more accurate on hard problems.",
+        "Use them for <b>math / code / hard reasoning</b>; skip them for easy asks.",
+        "Default fast; <b>escalate to thinking</b> when the answer needs to be right."
+      ],
+      "exercises": [
+        {
+          "t": "A/B the same bug",
+          "p": "Take a tricky logic or code problem. Ask a normal model, then a thinking model with the exact same prompt. Compare correctness and time.",
+          "hint": "This is his gradient-check experiment. The gap is widest on problems that need multi-step reasoning."
+        },
+        {
+          "t": "Don't over-think",
+          "p": "Ask a thinking model something trivial and time the wait. Feel why you wouldn't use it for everything.",
+          "hint": "Latency is the cost. Reserve reasoning models for when accuracy on a hard task is worth the minute."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "Which task best justifies a thinking model?",
+          "opts": [
+            "“Suggest three cities for a summer trip”",
+            "“Find the subtle bug making this gradient check fail”",
+            "“Rewrite this sentence more casually”",
+            "“What's the capital of France?”"
+          ],
+          "correct": 1,
+          "why": "Debugging needs multi-step reasoning — exactly where RL-trained thinking pays off. The others are simple or subjective and don't benefit from the extra latency."
+        },
+        {
+          "type": "flash",
+          "q": "Where do a thinking model's strategies come from?",
+          "a": "From reinforcement learning: practicing on many math/code problems, the model discovers effective reasoning moves (try, backtrack, re-check) on its own — strategies too open-ended for humans to hard-code."
+        }
+      ]
+    },
+    {
+      "id": "internet-search",
+      "part": 3,
+      "time": "24:27",
+      "title": "Tool use: internet search",
+      "tagline": "Break the model out of the box — let it read the live web into the context window.",
+      "mental": "Search is the first and most useful tool. The mechanism is exactly the zip-file picture plus one move: the model issues queries, <b>the web pages' text gets pasted into the context window</b>, and now it can answer from that working memory. This is the fix for the knowledge cutoff — but not every app has it, and you often have to tell it to search.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "His example is human: he watched White Lotus S3 episode one and wanted the release date for episode two. That's fresh — \"not in the zip file, most likely.\" So the model must go fetch it."
+        },
+        {
+          "t": "fig",
+          "src": "search-whitelotus.jpg",
+          "url": "chatgpt.com",
+          "alt": "ChatGPT searching the web for White Lotus season 3 release dates with citations",
+          "cap": "<b>Reading the web into memory.</b> The model visits pages, pulls the text into the context window, and answers — with citations you can click to verify."
+        },
+        {
+          "t": "quote",
+          "ts": "27:46",
+          "h": "Once we load the articles… think of their text as being copy-pasted into the context window — now they're in a working memory and the model can actually answer those questions."
+        },
+        {
+          "t": "callout",
+          "k": "verify",
+          "title": "Citations are the point",
+          "h": "Search doesn't make hallucination impossible. The value is the <b>links</b>: \"you can actually visit those web pages yourself and make sure that these are not hallucinations.\" Always keep the receipts."
+        },
+        {
+          "t": "callout",
+          "k": "tool",
+          "title": "Not every app has it — watch for it",
+          "h": "At filming: Perplexity (search-native), ChatGPT (a “Search” button), and Grok would search. Claude would <em>not</em> — it answered “as of my last update, April 2024.” Gemini 2.0&nbsp;<b>Pro</b> lacked search while 2.0&nbsp;<b>Flash</b> had it. Sometimes the model auto-detects it needs to search; when in doubt, <b>tick the search box yourself.</b>"
+        },
+        {
+          "t": "fig",
+          "src": "perplexity-market.jpg",
+          "url": "perplexity.ai",
+          "alt": "Perplexity answering whether the market is open today",
+          "cap": "<b>His habit tool.</b> For “is the market open today?”, “where was this filmed?”, “does Vercel offer Postgres?” — anything fresh or niche — he reaches for Perplexity."
+        }
+      ],
+      "takeaways": [
+        "Search <b>loads live web text into the context window</b>, then answers from it.",
+        "It's the direct cure for the <b>knowledge cutoff</b>.",
+        "Use it for <b>recent, niche, or changing</b> facts — and read the <b>citations</b>.",
+        "Availability is uneven; if unsure, <b>explicitly turn search on</b>."
+      ],
+      "exercises": [
+        {
+          "t": "Force the fetch",
+          "p": "Ask something from this week both with and without the search toggle. See when the model searches on its own vs. guesses from stale memory.",
+          "hint": "If it answers a fresh question with no “searching…”, it likely hallucinated a plausible date. Turn search on and compare."
+        },
+        {
+          "t": "Audit the sources",
+          "p": "Run a factual search query, then actually open two of its citations and confirm the claim.",
+          "hint": "This is the non-negotiable step. Search reduces hallucination; it doesn't eliminate it."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "Why can search answer questions the bare model can't?",
+          "opts": [
+            "It permanently retrains the model",
+            "It pastes fetched web text into the context window",
+            "It makes the model bigger",
+            "It removes the knowledge cutoff from pre-training"
+          ],
+          "correct": 1,
+          "why": "The pages' text enters working memory (the context window); the model then reads from there. Its underlying parameters and cutoff are unchanged."
+        },
+        {
+          "type": "flash",
+          "q": "Search returned an answer. Are you done?",
+          "a": "No — open the citations. Search grounds the model in real pages but the summary can still misread or fabricate. The links are what let you verify."
+        }
+      ]
+    },
+    {
+      "id": "deep-research",
+      "part": 3,
+      "time": "35:41",
+      "title": "Tool use: deep research",
+      "tagline": "Search + thinking, rolled out for tens of minutes — a custom research report on demand.",
+      "mental": "Deep research is \"a combination of internet search and thinking, rolled out for a long time.\" You ask, it optionally asks a clarifying question, then it disappears for ~10 minutes — issuing many searches, reading many papers, thinking — and returns something like a small, cited research paper. Incredible leverage. And still just a <b>first draft</b> you must check.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "His example: he was buying supplements and wanted to understand <em>CA-AKG</em> in Bryan Johnson's longevity mix — efficacy, mechanism, concerns. He writes a detailed prompt and turns on deep research."
+        },
+        {
+          "t": "fig",
+          "src": "deep-research-start.jpg",
+          "url": "chatgpt.com",
+          "alt": "A deep-research prompt about CA-AKG with the model asking clarifying questions",
+          "cap": "<b>Kick it off.</b> A specific prompt; the model asks a clarifying question or two, then goes away for ~10 minutes of search-and-think."
+        },
+        {
+          "t": "quote",
+          "ts": "42:04",
+          "h": "Even though it is doing research and it's pulling stuff in, there are no guarantees that there are no hallucinations here… Treat this as your first draft. Treat this as papers to look at. But don't take this as definitely true."
+        },
+        {
+          "t": "fig",
+          "src": "research-labs-table.jpg",
+          "url": "chatgpt.com",
+          "alt": "A deep-research table of major LLM research labs, with visible omissions",
+          "cap": "<b>A failure worth studying.</b> His “LLM labs in the USA” table omits xAI, wrongly includes Hugging Face and EleutherAI, and has shaky numbers. Powerful ≠ correct."
+        },
+        {
+          "t": "callout",
+          "k": "verify",
+          "title": "First draft, always",
+          "h": "Deep research is the most seductive place to over-trust the machine. The report reads authoritatively and cites sources — which is exactly why you must <b>open the citations</b> and confirm the claims before acting on them."
+        },
+        {
+          "t": "callout",
+          "k": "tool",
+          "title": "Everyone has a clone",
+          "h": "ChatGPT's is currently the most thorough in his experience. Perplexity has “Deep Research”; Grok has “DeepSearch.” Same recipe — search + reasoning over many minutes — with different depth and polish."
+        }
+      ],
+      "takeaways": [
+        "Deep research = <b>search + thinking, sustained for ~10 minutes</b>.",
+        "Output is a <b>cited, report-length</b> answer — great for surveying a topic.",
+        "It hallucinates and omits too — <b>treat every report as a first draft</b>.",
+        "ChatGPT, Perplexity, and Grok all offer a version."
+      ],
+      "exercises": [
+        {
+          "t": "Commission a report",
+          "p": "Pick something you'd otherwise spend an afternoon researching (a product comparison, an unfamiliar concept). Write a specific prompt, run deep research, and skim the result.",
+          "hint": "Be specific about scope in the prompt — like his CA-AKG request. Narrow questions get sharper reports."
+        },
+        {
+          "t": "Find the flaw",
+          "p": "In the report it produced, deliberately hunt for one wrong or missing thing by checking a citation or your own knowledge.",
+          "hint": "His labs table missed xAI and mis-included others. Every report has a seam like this — find yours."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "flash",
+          "q": "In one line, what is deep research?",
+          "a": "Internet search and reasoning, sustained over many minutes and many sources, producing a cited, report-length answer."
+        },
+        {
+          "type": "mcq",
+          "q": "The deep-research report is long, fluent, and cited. How should you treat it?",
+          "opts": [
+            "As definitely true",
+            "As a first draft to verify against its sources",
+            "As no better than a coin flip",
+            "As a replacement for reading anything yourself"
+          ],
+          "correct": 1,
+          "why": "It's a strong starting point with real leads, but it can hallucinate and omit. Use it as a first draft and confirm the load-bearing claims."
+        }
+      ]
+    },
+    {
+      "id": "file-uploads",
+      "part": 3,
+      "time": "44:47",
+      "title": "Read documents together (file uploads)",
+      "tagline": "Drop a PDF or paste a chapter into context, and read it alongside the model.",
+      "mental": "Instead of relying on hazy parametric knowledge, you can hand the model the <b>exact document</b>. Upload a PDF (it's converted to text and loaded into the window) or paste a book chapter, then read it together — asking questions as you go. Karpathy says this <b>dramatically increases retention and understanding</b>, especially for hard, foreign, or very old texts.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "He uploads a dense biology paper (Evo&nbsp;2, a DNA foundation model) — outside his field — and just asks for a summary, then reads the abstract and intro with the model beside him."
+        },
+        {
+          "t": "fig",
+          "src": "file-upload-evo2.jpg",
+          "url": "chatgpt.com",
+          "alt": "ChatGPT summarizing an uploaded genomics paper (Evo 2)",
+          "cap": "<b>Load the real thing.</b> The PDF is turned into text in the context window; now you can ask it anything about <em>this</em> document, not the model's vague memory of it."
+        },
+        {
+          "t": "p",
+          "h": "His favorite use is reading books. For <em>The Wealth of Nations</em> (1776, public domain via Project Gutenberg) he pastes the chapter he's on, asks for a summary to orient, then reads — pausing to ask whenever a passage is dense or the 18th-century language is opaque."
+        },
+        {
+          "t": "fig",
+          "src": "wealth-of-nations.jpg",
+          "url": "claude.ai",
+          "alt": "Claude summarizing a pasted chapter of The Wealth of Nations",
+          "cap": "<b>Never read alone.</b> Paste the chapter into context first — the model has heard of the book but doesn't remember <em>this chapter</em> until you load it."
+        },
+        {
+          "t": "quote",
+          "ts": "51:31",
+          "h": "Going hand in hand with LLMs dramatically increases my retention, my understanding of these chapters… I encourage you to experiment with it and don't read books alone."
+        },
+        {
+          "t": "callout",
+          "k": "model",
+          "title": "Why you must load it, not just name it",
+          "h": "The model has a fuzzy memory of famous books but \"probably doesn't remember exactly the content of this chapter.\" Naming it invites hallucination; <b>pasting it</b> puts the real text in working memory so answers are grounded in what's actually there."
+        },
+        {
+          "t": "callout",
+          "k": "tip",
+          "title": "The tooling is still clunky",
+          "h": "He does this with awkward copy-paste and wishes you could just highlight a passage in a reader and ask about it. As of filming, that seamless tool didn't exist — the payoff is worth the friction anyway."
+        }
+      ],
+      "takeaways": [
+        "Upload/paste the <b>actual document</b> into the context window — don't rely on recall.",
+        "Reading <b>with</b> an LLM boosts comprehension and retention.",
+        "Best for <b>hard, foreign, or old</b> texts you'd otherwise bounce off.",
+        "Naming a book ⇒ hallucination risk; <b>loading it</b> ⇒ grounded answers."
+      ],
+      "exercises": [
+        {
+          "t": "Read a hard page together",
+          "p": "Take one page of something outside your field — a paper, a legal doc, an old book — paste it in, ask for a plain-language summary, then ask two follow-ups about specific sentences.",
+          "hint": "Notice how much further you get than reading it cold. That's the retention effect he's pointing at."
+        },
+        {
+          "t": "Name vs. load",
+          "p": "Ask about a specific chapter of a famous book <em>without</em> pasting it, then paste it and ask again. Compare accuracy.",
+          "hint": "The first answer is parametric guesswork; the second is grounded. This is the whole lesson in one experiment."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "You want to discuss Chapter 3 of a well-known book. Best approach?",
+          "opts": [
+            "Just name the chapter and ask",
+            "Paste the chapter into the context window, then ask",
+            "Ask the model to recall it from memory word-for-word",
+            "Use a thinking model instead"
+          ],
+          "correct": 1,
+          "why": "The model's memory of a specific chapter is unreliable. Loading the actual text grounds the conversation and prevents confident hallucination."
+        },
+        {
+          "type": "flash",
+          "q": "What happens to a PDF when you upload it?",
+          "a": "It's (most likely) converted to text and loaded into the context window — often dropping images. Once it's in working memory, the model can answer questions grounded in the document's actual words."
+        }
+      ]
+    },
+    {
+      "id": "python-interpreter",
+      "part": 3,
+      "time": "52:55",
+      "title": "Tool use: the Python interpreter",
+      "tagline": "When it can't do it in its head, it writes a program and runs it — if it has the tool.",
+      "mental": "Give the model a calculator-shaped problem and a good app won't fake it — it <b>writes a program</b>, emits special tokens that say \"run this,\" pauses, gets the result back as text, and continues. The catch runs through this whole part: <b>tool availability is uneven</b>. A model without the interpreter will cheerfully hallucinate the answer instead.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "Ask \"30 × 9\" and the model just answers 270 — that's easy enough to do \"in its head\" (pure next-token prediction). Ask it to multiply two big numbers and it can't — so it reaches for the tool."
+        },
+        {
+          "t": "fig",
+          "src": "multiplication.jpg",
+          "url": "chatgpt.com",
+          "alt": "ChatGPT opening a Python interpreter to compute a large multiplication",
+          "cap": "<b>Knowing when to reach for a tool.</b> For a hard multiplication, ChatGPT opens the Python interpreter, runs real code, and returns the exact result."
+        },
+        {
+          "t": "quote",
+          "ts": "53:07",
+          "h": "Instead of the LLM giving you an answer directly, it has the ability now to write a computer program… Please go off and run it and give me the result of running that computer program."
+        },
+        {
+          "t": "callout",
+          "k": "verify",
+          "title": "No tool ⇒ confident wrong answers",
+          "h": "Grok (at filming) had no interpreter and did a big multiplication \"in its head\" — landing \"remarkably close,\" but wrong (…0,6,0 instead of …1,2,0). Gemini did one correctly in-head, then failed on a harder one. <b>A model without the tool will still answer — it just makes it up.</b>"
+        },
+        {
+          "t": "fig",
+          "src": "claude-no-tool.jpg",
+          "url": "claude.ai",
+          "alt": "A model attempting arithmetic without a code tool",
+          "cap": "<b>Same task, different tools.</b> Claude wrote JavaScript (correct); others guessed. You have to track which model has which tool."
+        }
+      ],
+      "takeaways": [
+        "Good apps <b>write & run code</b> for calculator-shaped problems.",
+        "Special tokens tell the app to execute, then feed the result back as text.",
+        "<b>Tool availability is uneven</b> across models.",
+        "A model without the tool will <b>hallucinate the number</b> rather than admit it."
+      ],
+      "exercises": [
+        {
+          "t": "Force the tool",
+          "p": "Ask your model to multiply two ~7-digit numbers. Does it open a code tool, or just print digits? Verify the result on a calculator.",
+          "hint": "If there's no “analyzing / running code” step, be suspicious — it may have guessed and be subtly wrong."
+        },
+        {
+          "t": "Tool census",
+          "p": "Try the same hard-arithmetic prompt across two or three providers and note which actually run code.",
+          "hint": "This is Karpathy's real point: keep a mental map of which model has which tool, because it decides whether you can trust the answer."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "A model with no code interpreter is asked to multiply two large numbers. What does it typically do?",
+          "opts": [
+            "Refuse and say it can't",
+            "Silently write and run Python",
+            "Do it “in its head” and often get it subtly wrong",
+            "Search the web for the answer"
+          ],
+          "correct": 2,
+          "why": "Without the tool it falls back to next-token prediction — often close but wrong, and stated with full confidence. That's why tracking tool availability matters."
+        },
+        {
+          "type": "flash",
+          "q": "What actually happens when the model “uses” the Python interpreter?",
+          "a": "It writes a program and emits special tokens meaning “run this.” The app executes the code, captures the output, feeds it back into the context as text, and the model continues from there."
+        }
+      ]
+    },
+    {
+      "id": "advanced-data-analysis",
+      "part": 3,
+      "time": "58:35",
+      "title": "Advanced Data Analysis",
+      "tagline": "A junior data analyst that gathers data, writes code, and plots it — check its work.",
+      "mental": "Bolt the Python interpreter onto a data workflow and ChatGPT becomes \"a junior data analyst\": it can search for data, build a table, write plotting code, and show you figures. Genuinely useful — and genuinely error-prone. It makes silent assumptions and sometimes states conclusions its own code contradicts. Amazing, but you must <b>read the code.</b>",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "He has it research OpenAI's valuation over time (explicitly using search so it doesn't fabricate), build a table, then \"plot this, use a log scale for the y-axis.\" It writes the code and renders the figure."
+        },
+        {
+          "t": "fig",
+          "src": "valuation-plot.jpg",
+          "url": "chatgpt.com",
+          "alt": "ChatGPT plotting OpenAI valuation over time on a log scale",
+          "cap": "<b>Data → table → figure.</b> Search for the data, generate a table, then have it write and run plotting code — a fast path from question to chart."
+        },
+        {
+          "t": "callout",
+          "k": "verify",
+          "title": "Two mistakes in one demo",
+          "h": "<b>Silent assumption:</b> for a missing 2015 value it quietly plugged in 0.1 (i.e. $100M) in the code without telling him. <b>Contradiction:</b> it claimed a 2030 extrapolation of ~$1.7T while its own printed variable said ~$20T. \"You lied to me.\" — \"Yeah, sorry, I messed up.\""
+        },
+        {
+          "t": "quote",
+          "ts": "63:04",
+          "h": "It is kind of like a very, very junior data analyst… It's amazing that it can plot figures, but you have to still know what this code is doing and scrutinize it."
+        },
+        {
+          "t": "fig",
+          "src": "valuation-plot2.jpg",
+          "url": "chatgpt.com",
+          "alt": "ChatGPT extrapolating a trend line to 2030 with an inconsistent figure",
+          "cap": "<b>Trust, but read the code.</b> The trend-fit looks authoritative — but the stated number and the computed number disagreed. Only reading the code catches it."
+        }
+      ],
+      "takeaways": [
+        "ADA = <b>search + code + plotting</b> = a fast “junior analyst.”</b>",
+        "It makes <b>silent assumptions</b> (e.g. filling missing data).",
+        "It can <b>state a conclusion its own code contradicts</b>.",
+        "Powerful, but <b>read and verify the generated code.</b>"
+      ],
+      "exercises": [
+        {
+          "t": "Plot something real",
+          "p": "Give it a small dataset (or ask it to gather one via search) and request a chart. Then open the code and check every assumption it made.",
+          "hint": "Look specifically for missing-value handling and any hard-coded numbers — that's where his 0.1 assumption hid."
+        },
+        {
+          "t": "Catch a contradiction",
+          "p": "Ask it to compute a value and also print the underlying variable. Compare the prose answer to the printed number.",
+          "hint": "His $1.7T-vs-$20T mismatch surfaced only because he made it print the raw variable. Do the same."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "flash",
+          "q": "Why call it a “junior” analyst?",
+          "a": "It can do the mechanical work fast — gather, tabulate, code, plot — but it's absent-minded: it makes unstated assumptions and occasional errors, so its output needs a competent reviewer (you) reading the code."
+        },
+        {
+          "type": "mcq",
+          "q": "Its prose says the 2030 value is $1.7T; its printed variable says $20T. What went wrong and what saved him?",
+          "opts": [
+            "The code was fine; the plot was wrong",
+            "It hallucinated the summary number; printing the raw variable exposed it",
+            "Log scale is inherently unreliable",
+            "Search returned bad data"
+          ],
+          "correct": 1,
+          "why": "The written conclusion didn't match its own computation. Making it print the actual variable revealed the contradiction — a habit worth keeping."
+        }
+      ]
+    },
+    {
+      "id": "claude-artifacts",
+      "part": 3,
+      "time": "63:04",
+      "title": "Claude Artifacts: apps & diagrams",
+      "tagline": "Have it write a small app that runs right there — and turn any text into a diagram.",
+      "mental": "Artifacts is Claude writing a real (React) app and <b>running it inline in your browser</b> — no backend, no deploy. Ask for flashcards and you get a working flashcard app made <em>just for you.</em> Karpathy's own favorite use, though, is quieter: <b>diagram generation</b> — turning a chapter or a codebase into a clear conceptual map.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "He pastes the Adam Smith Wikipedia intro, asks for 20 flashcards, then: \"use the artifacts feature to write a flashcards app to test these.\" Claude writes React components and the interface runs them live."
+        },
+        {
+          "t": "fig",
+          "src": "adam-smith-flashcards.jpg",
+          "url": "claude.ai",
+          "alt": "A working flashcard app generated by Claude Artifacts",
+          "cap": "<b>A custom app, on demand.</b> No database, no deploy — a local app that runs in the browser, built for exactly your data. A new paradigm from “download someone's app and import your data.”"
+        },
+        {
+          "t": "p",
+          "h": "His higher-value habit is diagrams. Attach a chapter, ask for a \"conceptual diagram,\" and Claude writes a Mermaid graph laying out the argument as a tree — great for visual thinkers trying to hold a chapter's structure in mind."
+        },
+        {
+          "t": "fig",
+          "src": "division-labor-diagram.jpg",
+          "url": "claude.ai",
+          "alt": "A Mermaid conceptual diagram of Adam Smith's division of labor",
+          "cap": "<b>Structure you can see.</b> The division-of-labor argument laid out spatially — “it helps me remember what that chapter is about very easily.” Works on books, chapters, even source code."
+        },
+        {
+          "t": "callout",
+          "k": "tool",
+          "title": "What's different here",
+          "h": "Ordinarily engineers ship an app and you adapt to it. With Artifacts, <b>the model writes the app around you</b>. These are local, backend-less apps — limited, but often exactly enough."
+        }
+      ],
+      "takeaways": [
+        "Artifacts <b>writes and runs a small app inline</b> — bespoke, no backend.",
+        "Great for one-off tools (flashcards, timers, tiny games).",
+        "Karpathy's favorite use is <b>diagram generation</b> (Mermaid) to see an argument's structure.",
+        "Works on chapters, papers, and codebases alike."
+      ],
+      "exercises": [
+        {
+          "t": "Make a tool for yourself",
+          "p": "Paste some notes and ask Claude to build an Artifact that quizzes you on them. Use it.",
+          "hint": "Notice you didn't download anyone's app — the model wrote one around your exact content."
+        },
+        {
+          "t": "Map an argument",
+          "p": "Paste a dense chapter or a chunk of code and ask for a conceptual diagram. See if the spatial layout helps you remember it.",
+          "hint": "This is his real workhorse use. Visual structure is a memory aid — especially for unfamiliar material."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "What makes an Artifact different from a normal web app?",
+          "opts": [
+            "It has a big cloud backend",
+            "The model writes it on the spot and runs it inline, with no backend",
+            "It only works on mobile",
+            "It permanently installs on your machine"
+          ],
+          "correct": 1,
+          "why": "Artifacts are local, backend-less apps generated for your specific need and executed right in the Claude interface — the app adapts to you, not the reverse."
+        },
+        {
+          "type": "flash",
+          "q": "What's Karpathy's favorite Artifacts use, and why?",
+          "a": "Diagram generation (via Mermaid). As a visual thinker, laying an argument or codebase out as a tree helps him grasp and remember its structure quickly."
+        }
+      ]
+    },
+    {
+      "id": "cursor-vibe-coding",
+      "part": 3,
+      "time": "68:12",
+      "title": "Cursor & vibe coding",
+      "tagline": "For real programming, leave the web app: a tool with your files, driven by commands.",
+      "mental": "For serious code, don't copy-paste snippets out of a chat window — it's too slow and the model lacks context. Use a dedicated app like <b>Cursor</b> that sits on your file system, calls a model's API under the hood, and edits across your project. Its <b>Composer</b> agent can run commands and change many files at once. You mostly give instructions and hope — \"<b>vibe coding</b>.\"",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "Cursor isn't a website — it's a program with your files. Under the hood it calls Claude's API, but you never copy-paste; it has the context of your whole directory."
+        },
+        {
+          "t": "fig",
+          "src": "cursor-tictactoe1.jpg",
+          "url": "Cursor · localhost",
+          "alt": "Cursor's Composer building a tic-tac-toe React app",
+          "cap": "<b>From five sentences to an app.</b> He asked Composer to scaffold a React repo and make tic-tac-toe; it wrote the CSS, JS, and structure. He “didn't really do anything except write five sentences.”"
+        },
+        {
+          "t": "quote",
+          "ts": "72:27",
+          "h": "The name for this is called Vibe Coding — a name that I think I probably minted. Vibe Coding just refers to… giving control to Composer and just telling it what to do and hoping that it works."
+        },
+        {
+          "t": "p",
+          "h": "He asks for confetti and a victory sound when someone wins. Composer installs a library, edits multiple files, even fetches a sound file — pausing to ask permission for risky commands. It mostly just works."
+        },
+        {
+          "t": "fig",
+          "src": "cursor-tictactoe2.jpg",
+          "url": "Cursor · localhost",
+          "alt": "The tic-tac-toe app with a confetti win effect added by the agent",
+          "cap": "<b>The agent at work.</b> Composer edits across files, runs commands (with confirmations), and deploys on save — you supervise more than you type."
+        },
+        {
+          "t": "callout",
+          "k": "tip",
+          "title": "The escape hatch",
+          "h": "Vibe coding isn't a trap because <b>you still have the files</b>. If the agent gets stuck, \"we can always fall back to standard programming.\" The AI does the low-level work; you keep the ability to take the wheel."
+        }
+      ],
+      "takeaways": [
+        "For real coding, use a <b>file-aware app</b> (Cursor), not chat copy-paste.",
+        "It calls a model's <b>API under the hood</b> with your project's full context.",
+        "<b>Composer</b> is an agent: multi-file edits, runs commands, asks before risky ones.",
+        "“<b>Vibe coding</b>” = instruct and hope — with a fallback to real programming."
+      ],
+      "exercises": [
+        {
+          "t": "Vibe a tiny app",
+          "p": "In Cursor (or a similar agent editor), start an empty project and ask it to build one small thing in a few sentences. Watch it scaffold and edit.",
+          "hint": "Keep instructions high-level at first — you're testing how far “telling it what to do and hoping” gets you."
+        },
+        {
+          "t": "Take the wheel",
+          "p": "After the agent finishes, open one file and make a manual change. Prove to yourself the fallback exists.",
+          "hint": "This is the safety valve that makes vibe coding sane: the files are yours, editable by hand any time."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "Why use Cursor instead of pasting code in and out of a chat?",
+          "opts": [
+            "Chat models can't write code",
+            "Cursor has your files' full context and edits them directly — copy-paste is slow and context-poor",
+            "Cursor doesn't use an LLM",
+            "It's the only tool with a thinking model"
+          ],
+          "correct": 1,
+          "why": "A dedicated editor sees your whole project and edits files in place. Chat copy-paste is slow and gives the model none of that surrounding context."
+        },
+        {
+          "type": "flash",
+          "q": "Define “vibe coding” and its safety net.",
+          "a": "Handing control to the agent (Composer) — describing what you want and hoping it works. The safety net: you still own the files and can always drop back to editing code by hand."
+        }
+      ]
+    },
+    {
+      "id": "audio-input",
+      "part": 4,
+      "time": "1:16:48",
+      "title": "Speak to it (audio input)",
+      "tagline": "Stop typing. Roughly half his queries are voice — and on the phone, most of them.",
+      "mental": "The first modality is the easiest win: don't type, <b>talk.</b> On the phone the mic is built in — it transcribes your speech to text and you send it. On desktop, ChatGPT lacks an inline mic, so he uses a <b>system-wide</b> speech-to-text app (bind a key, talk, it types for you). Karpathy: about half of his queries — most on mobile — are just voice, \"because I'm lazy and it's just so much faster.\"",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "On the ChatGPT phone app there are two different voice buttons. The plain <b>microphone</b> icon is the one that matters here: it listens and transcribes your words into the text box. You still send text — you just didn't type it."
+        },
+        {
+          "t": "fig",
+          "src": "phone-stt.jpg",
+          "url": "ChatGPT · iOS",
+          "alt": "The ChatGPT phone app transcribing speech to text with an on-screen keyboard",
+          "cap": "<b>Two voice buttons.</b> The microphone = speech-to-text (dictation). The other icon = true voice mode (next sections). On mobile, dictation is his default input."
+        },
+        {
+          "t": "callout",
+          "k": "tip",
+          "title": "On desktop, go system-wide",
+          "h": "The desktop app has no mic button, so he uses a system-wide dictation app — <b>SuperWhisper, WisprFlow, MacWhisper</b> — bound to a key (he uses F5). Press, speak, press again; it types into <em>any</em> app, not just ChatGPT."
+        },
+        {
+          "t": "quote",
+          "ts": "1:21:46",
+          "h": "The big takeaway here is: don't type stuff out. Use voice. It works quite well, and I use this pervasively — roughly half of my queries are just audio because I'm lazy and it's so much faster."
+        },
+        {
+          "t": "callout",
+          "k": "verify",
+          "title": "Type the proper nouns",
+          "h": "Dictation mangles product names, library names, and technical terms. When exact spelling matters, type it. Everyday phrasing? Just talk."
+        }
+      ],
+      "takeaways": [
+        "Phone: built-in <b>mic = dictation</b> (speech → text you then send).",
+        "Desktop: use a <b>system-wide STT app</b> (SuperWhisper / WisprFlow / MacWhisper) on a hotkey.",
+        "~<b>half</b> of his queries are voice; most of his mobile ones.",
+        "<b>Type the proper nouns</b> — dictation misheres them."
+      ],
+      "exercises": [
+        {
+          "t": "Talk for a day",
+          "p": "For one day, dictate your prompts (phone mic, or a desktop STT app) instead of typing. Notice the speed change.",
+          "hint": "His claim is ~2× faster for everyday phrasing. The friction is only in names and jargon."
+        },
+        {
+          "t": "Bind a hotkey",
+          "p": "Install a system-wide STT app and bind it to a key. Dictate into a non-ChatGPT app to prove it's system-wide.",
+          "hint": "That's the desktop unlock — voice input everywhere, not just inside one chat app."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "On desktop, ChatGPT has no mic button. Karpathy's fix?",
+          "opts": [
+            "Type everything",
+            "Use a system-wide speech-to-text app bound to a key",
+            "Only use the phone",
+            "Wait for a browser update"
+          ],
+          "correct": 1,
+          "why": "A system-wide dictation tool (SuperWhisper/WisprFlow/MacWhisper) transcribes into any app via a hotkey — no built-in mic required."
+        },
+        {
+          "type": "flash",
+          "q": "When should you still type instead of dictate?",
+          "a": "For exact strings dictation gets wrong — product names, library names, technical terms. Everyday phrasing is fine by voice."
+        }
+      ]
+    },
+    {
+      "id": "audio-output",
+      "part": 4,
+      "time": "1:18:35",
+      "title": "Have it read aloud (audio output)",
+      "tagline": "Text-to-speech reads answers back — but this and dictation are still “fake audio.”",
+      "mental": "The mirror image of dictation: <b>text-to-speech</b> reads the answer out loud. ChatGPT has a \"read aloud\"; you can also use a system-wide TTS app. But notice what's happening — STT and TTS just wrap a text model. The audio never enters the model itself. Karpathy calls this <b>\"fake audio,\"</b> and it sets up the real thing in the next section.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "On output, most apps can read a reply back to you. ChatGPT has a \"read aloud\" button that pipes the text through a text-to-speech model."
+        },
+        {
+          "t": "quote",
+          "ts": "1:22:03",
+          "h": "What we've talked about so far is what I would describe as fake audio. It's fake audio because we're still interacting with the model via text — we're just using a speech-to-text or text-to-speech model to pre-process."
+        },
+        {
+          "t": "callout",
+          "k": "model",
+          "title": "Why it's “fake”",
+          "h": "Dictation converts <em>your audio → text</em> before the model sees it; read-aloud converts <em>the model's text → audio</em> after. The language model only ever handled text. It's a convenient wrapper — not the model hearing or speaking. That distinction is the whole point of the next section."
+        },
+        {
+          "t": "callout",
+          "k": "tip",
+          "title": "Availability varies",
+          "h": "Read-aloud may or may not be present in a given app. Input (dictation) can be made system-wide easily; for output you can also install a system-wide TTS app to read anything on screen."
+        }
+      ],
+      "takeaways": [
+        "<b>TTS</b> reads answers back (ChatGPT “read aloud”, or a system-wide app).",
+        "STT + TTS = a <b>text model wrapped in audio</b> — the model itself only sees text.",
+        "Karpathy's name for it: <b>“fake audio.”</b>",
+        "Read-aloud availability differs per app."
+      ],
+      "exercises": [
+        {
+          "t": "Round-trip by voice",
+          "p": "Dictate a question, then have the reply read aloud. You've now done a full voice loop — with a text model in the middle.",
+          "hint": "Feel where the “seams” are. Latency and the hand-offs are the tell that it's a wrapper, not native audio."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "flash",
+          "q": "Why are dictation + read-aloud called “fake audio”?",
+          "a": "Because the language model still only processes text. Speech-to-text converts your voice to text before it, and text-to-speech converts its text to voice after it. The audio never enters the model."
+        },
+        {
+          "type": "mcq",
+          "q": "In the “fake audio” pipeline, what does the language model actually receive and produce?",
+          "opts": [
+            "Audio in, audio out",
+            "Text in, text out",
+            "Audio in, text out",
+            "Images in, audio out"
+          ],
+          "correct": 1,
+          "why": "It's text-in/text-out; the audio conversions happen entirely outside the model, before and after."
+        }
+      ]
+    },
+    {
+      "id": "advanced-voice",
+      "part": 4,
+      "time": "1:22:01",
+      "title": "Advanced Voice Mode (true audio)",
+      "tagline": "Now the model hears and speaks natively — audio chopped into tokens, no text in between.",
+      "mental": "Real audio means treating sound the way we treat text: chop the waveform into a spectrogram, quantize little windows into <b>audio tokens</b> (a vocabulary of ~100k chunks), and train the model on them. Now it can <b>hear and speak directly</b> — no text in the middle. This unlocks things fake audio never could: accents, character voices, tone. It's also \"very cagey\" and refuses a lot.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "This is the other voice button. Under the hood, audio is tokenized — a spectrogram sliced into windows, each mapped to one of ~100,000 audio chunks — so the model natively understands and generates sound."
+        },
+        {
+          "t": "fig",
+          "src": "voice-orb.jpg",
+          "url": "ChatGPT · Advanced Voice",
+          "alt": "ChatGPT Advanced Voice Mode showing an animated blue orb",
+          "cap": "<b>The model, speaking.</b> No transcript in the loop — audio tokens go back and forth. The text you see afterward is just a transcription of the real audio conversation."
+        },
+        {
+          "t": "p",
+          "h": "In his demo it explains Rayleigh scattering, then speaks as Yoda, then a pirate, tells a story, counts fast, and does animal sounds — feats impossible for a text model with a TTS bolt-on. But it also refuses often (\"I can't actually produce animal sounds\") right after doing exactly that."
+        },
+        {
+          "t": "quote",
+          "ts": "1:27:04",
+          "h": "I do find that the advanced voice is very, very cagey. It really doesn't like to do stuff — it will refuse a lot. So I do find it sometimes a little bit too cringe."
+        },
+        {
+          "t": "fig",
+          "src": "grok-voice.jpg",
+          "url": "grok.com",
+          "alt": "Grok's voice mode with multiple personality modes",
+          "cap": "<b>Less filtered alternative.</b> Grok's voice has many modes (some “truly unhinged”). Where ChatGPT refuses, Grok “will just go there” — better for entertainment, per Karpathy."
+        },
+        {
+          "t": "callout",
+          "k": "model",
+          "title": "Native vs. tacked-on — a recurring theme",
+          "h": "A modality handled <em>inside</em> the model (audio tokens) is far more powerful than one wrapped around it (STT/TTS). You'll see the same distinction for images and video: <b>native / omni-model</b> beats <b>separate model glued on by text.</b>"
+        }
+      ],
+      "takeaways": [
+        "True audio = <b>audio tokens</b> (spectrogram → quantized chunks) inside the model.",
+        "The model <b>hears and speaks directly</b> — no text intermediary.",
+        "Unlocks voices, accents, tone; the text you see is just a transcript.",
+        "ChatGPT's is <b>cagey/refuses</b>; Grok's voice is far less filtered."
+      ],
+      "exercises": [
+        {
+          "t": "Push the voice",
+          "p": "In Advanced Voice, ask it to explain something as a specific character or in a specific accent, then to change tone mid-answer.",
+          "hint": "These only work because audio is native. A TTS wrapper couldn't restyle its own voice on request."
+        },
+        {
+          "t": "Feel the cageyness",
+          "p": "Ask for something playful (an animal sound, an impression). Note where it refuses, then try the same on Grok voice.",
+          "hint": "This is his real-world caveat: capability is there, but guardrails vary a lot by provider."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "What makes Advanced Voice different from dictation + read-aloud?",
+          "opts": [
+            "It's faster text-to-speech",
+            "Audio is tokenized and processed natively inside the model — no text in between",
+            "It uses a bigger microphone",
+            "It only works on desktop"
+          ],
+          "correct": 1,
+          "why": "Native audio tokens let the model hear and speak directly, enabling voices and tone that a text-model-plus-TTS wrapper can't produce."
+        },
+        {
+          "type": "flash",
+          "q": "How is audio turned into something a model can learn?",
+          "a": "Convert the sound to a spectrogram, slice it into small time windows, and quantize each into one of ~100k “audio tokens.” The model trains on these just like text tokens."
+        }
+      ]
+    },
+    {
+      "id": "notebooklm-podcasts",
+      "part": 4,
+      "time": "1:31:30",
+      "title": "Generate podcasts (NotebookLM)",
+      "tagline": "Turn a dense document into a listenable, two-host audio overview — then talk back to it.",
+      "mental": "A specialized flavor of audio output: hand Google's <b>NotebookLM</b> a source (a paper, a set of notes) and it generates an <b>“Audio Overview”</b> — a two-host podcast discussing it. Great for absorbing hard material passively. You can even jump in and ask the hosts questions. Karpathy generated a whole podcast, \"Histories of Mysteries,\" this way.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "He loads the same Evo&nbsp;2 genomics paper into NotebookLM and generates an Audio Overview — two AI hosts talking through the paper conversationally."
+        },
+        {
+          "t": "fig",
+          "src": "notebooklm.jpg",
+          "url": "notebooklm.google.com",
+          "alt": "NotebookLM generating an Audio Overview of the Evo 2 paper",
+          "cap": "<b>Paper → podcast.</b> Drop in sources, hit Audio Overview, and get a two-host discussion of the material — with an interactive mode to ask questions mid-episode."
+        },
+        {
+          "t": "fig",
+          "src": "histories-mysteries.jpg",
+          "url": "podcast player",
+          "alt": "“Histories of Mysteries”, an AI-generated podcast by Andrej Karpathy",
+          "cap": "<b>A full show, generated.</b> Karpathy turned NotebookLM into “Histories of Mysteries” — proof the format scales beyond a one-off overview."
+        },
+        {
+          "t": "callout",
+          "k": "tip",
+          "title": "When to reach for it",
+          "h": "Use it to <b>learn passively</b> — on a walk or commute — from something you'd struggle to read closely. It's the audio-output cousin of “read documents together”: same goal (absorb hard material), different channel."
+        }
+      ],
+      "takeaways": [
+        "NotebookLM turns sources into a <b>two-host “Audio Overview” podcast</b>.",
+        "You can <b>interrupt and ask questions</b> during it.",
+        "Ideal for <b>passive learning</b> from dense material.",
+        "Karpathy built a real podcast (“Histories of Mysteries”) this way."
+      ],
+      "exercises": [
+        {
+          "t": "Podcast a paper",
+          "p": "Load a paper or a pile of your own notes into NotebookLM and generate an Audio Overview. Listen to five minutes.",
+          "hint": "Pick something you've been avoiding reading — this is the low-effort way in."
+        },
+        {
+          "t": "Interrupt the hosts",
+          "p": "Use the interactive mode to ask the AI hosts a clarifying question mid-episode.",
+          "hint": "That's the feature that makes it a study tool, not just a listen — you steer it toward what you don't understand."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "flash",
+          "q": "What does NotebookLM's Audio Overview produce, and from what?",
+          "a": "A two-host podcast-style discussion generated from sources you provide (papers, notes) — and you can interrupt to ask questions."
+        },
+        {
+          "type": "mcq",
+          "q": "Audio Overviews are most useful for…",
+          "opts": [
+            "Generating images",
+            "Passively absorbing dense material you'd struggle to read",
+            "Running code",
+            "Searching the live web"
+          ],
+          "correct": 1,
+          "why": "It's an audio-output learning aid — turning hard reading into something you can listen to and interrogate."
+        }
+      ]
+    },
+    {
+      "id": "image-input",
+      "part": 4,
+      "time": "1:35:00",
+      "title": "Show it images (OCR & vision)",
+      "tagline": "Point it at labels, lab results, receipts, memes — it can read, transcribe, and reason.",
+      "mental": "Images become tokens too — an image is chopped into patches and fed in like text. So you can <b>show</b> the model things: a supplement label, a blood panel, an ingredient list, a math problem, a meme. It'll OCR the text, transcribe it, and reason about it. Same rule as always: it can misread, so verify the transcription on anything that matters.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "His examples are everyday: photograph a nutrition/supplement label and have it transcribe the facts; upload a blood-test lipid panel and ask it to read and explain the numbers."
+        },
+        {
+          "t": "fig",
+          "src": "supplement-label.jpg",
+          "url": "chatgpt.com",
+          "alt": "ChatGPT transcribing a supplement nutrition label from a photo",
+          "cap": "<b>OCR + understanding.</b> Snap a label; it transcribes the supplement facts and can explain what each active does."
+        },
+        {
+          "t": "fig",
+          "src": "lipid-panel.jpg",
+          "url": "chatgpt.com",
+          "alt": "ChatGPT reading and explaining a blood-test lipid panel from an image",
+          "cap": "<b>Read my results.</b> A photographed lipid panel, transcribed and explained — one screenshot at a time."
+        },
+        {
+          "t": "p",
+          "h": "He also has it weigh a toothpaste's ingredients (which are functional vs. cosmetic) and explain an image-based joke — the \"a group of crows is a murder\" meme — showing it reasons about images, not just reads them."
+        },
+        {
+          "t": "fig",
+          "src": "toothpaste.jpg",
+          "url": "chatgpt.com",
+          "alt": "ChatGPT analyzing toothpaste ingredients as functional vs cosmetic",
+          "cap": "<b>Reason, not just read.</b> From a photo of an ingredient list to a functional-vs-cosmetic breakdown."
+        },
+        {
+          "t": "callout",
+          "k": "verify",
+          "title": "Check the transcription",
+          "h": "Vision OCR is strong but not perfect. On anything consequential — dosages, lab values, contracts — confirm the transcription against the original before you act on the model's reasoning."
+        }
+      ],
+      "takeaways": [
+        "Images are <b>tokenized as patches</b> — the model can “see.”",
+        "Great for <b>OCR + reasoning</b>: labels, lab panels, ingredients, math, memes.",
+        "It <b>reasons about</b> images, not just transcribes them.",
+        "<b>Verify the transcription</b> on anything that matters."
+      ],
+      "exercises": [
+        {
+          "t": "Photograph the physical world",
+          "p": "Take a photo of a label, receipt, or lab result and ask the model to transcribe and explain it.",
+          "hint": "Then check its transcription against the original — this is the OCR-verification habit."
+        },
+        {
+          "t": "Explain the joke",
+          "p": "Give it a meme or a diagram and ask what makes it work.",
+          "hint": "If it explains the pun or the structure, you're seeing genuine visual reasoning, not just text extraction."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "How does the model take in an image?",
+          "opts": [
+            "It emails it to a human",
+            "It splits the image into patches and treats them as tokens",
+            "It only reads the filename",
+            "It converts it to audio first"
+          ],
+          "correct": 1,
+          "why": "Like text and audio, images are tokenized (into patches) and fed into the model, which is why it can both read and reason about them."
+        },
+        {
+          "type": "flash",
+          "q": "What's the one habit to keep with image OCR?",
+          "a": "Verify the transcription. Vision is strong but can misread digits or fine print — confirm against the original before acting on anything important."
+        }
+      ]
+    },
+    {
+      "id": "image-output",
+      "part": 4,
+      "time": "1:41:30",
+      "title": "Have it make images",
+      "tagline": "Generate images from a prompt — handy, but usually a separate model bolted on.",
+      "mental": "The output side of vision: describe an image and get one back (DALL·E, Ideogram, and others). Useful, but note the architecture — image generation is often a <b>separate model tacked on</b>, communicating with the language model via text, rather than the LLM painting natively. Karpathy doesn't lean on it much (\"I'm not in a creative profession\"), but it's easy and fun.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "A neat trick he shows: \"generate an image that summarizes today\" — the model takes what it knows about the day (from memory or the chat) and hands a prompt to the image model."
+        },
+        {
+          "t": "fig",
+          "src": "dalle-cherry.jpg",
+          "url": "chatgpt.com · DALL·E",
+          "alt": "A generated illustration of a serene cherry-blossom scene",
+          "cap": "<b>Prompt → picture.</b> A calm cherry-blossom scene, generated on request."
+        },
+        {
+          "t": "fig",
+          "src": "dalle-collage.jpg",
+          "url": "chatgpt.com · DALL·E",
+          "alt": "A generated collage summarizing the day's news",
+          "cap": "<b>“Summarize today” as an image.</b> A news-collage generated from the day's topics — an image standing in for a summary."
+        },
+        {
+          "t": "callout",
+          "k": "model",
+          "title": "Usually tacked-on, not native",
+          "h": "Most image generation is a <b>separate model</b> the LLM calls with a text prompt — the same native-vs-glued-on distinction from voice. That's why the LLM sometimes can't finely control or “see” exactly what came back."
+        }
+      ],
+      "takeaways": [
+        "Describe → get an image (DALL·E, Ideogram, …).",
+        "Often a <b>separate model</b> driven by a text prompt, not native painting.",
+        "Fun/handy; not something Karpathy relies on heavily."
+      ],
+      "exercises": [
+        {
+          "t": "Summarize today, visually",
+          "p": "Ask your app to “generate an image that summarizes today,” letting it draw on the chat or your memory.",
+          "hint": "Watch how it writes a text prompt for the image model — that hand-off is the “tacked-on” architecture."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "flash",
+          "q": "Native vs. tacked-on — which is image generation, usually?",
+          "a": "Usually tacked-on: a separate image model the LLM calls with a text prompt, rather than the language model generating pixels natively. (Contrast with Advanced Voice, which is native audio.)"
+        }
+      ]
+    },
+    {
+      "id": "video-input",
+      "part": 4,
+      "time": "1:44:24",
+      "title": "Point the camera (video input)",
+      "tagline": "Advanced Voice + camera: point at the world and just ask about what it sees.",
+      "mental": "Combine true voice with a live camera and you can <b>point your phone at anything and talk about it.</b> Under the hood it's likely sampling ~an image per second, but it feels like streaming video. \"Quite magical, super simple to use\" — the most natural on-ramp for non-power-users (show your parents).",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "In his demo he pans the camera around his desk and the model identifies everything, live:"
+        },
+        {
+          "t": "quote",
+          "ts": "1:45:00",
+          "h": "“What book is this?” — “That's Genghis Khan and the Making of the Modern World by Jack Weatherford.” … “And what is this?” — “That's an Aranet4, a portable CO₂ monitor… you're at 713 ppm, that's generally okay.” … “What is this map?” — “That looks like a map of Middle-earth from The Lord of the Rings.”"
+        },
+        {
+          "t": "callout",
+          "k": "model",
+          "title": "How it works under the hood",
+          "h": "He suspects it doesn't truly consume video — it \"still just takes image sections, maybe one image per second.\" But from the user's side it feels like you can stream video and it makes sense. Native video input is coming; today it's fast image sampling."
+        },
+        {
+          "t": "callout",
+          "k": "tip",
+          "title": "The best demo for newcomers",
+          "h": "He doesn't use it much himself (his queries are targeted, about code), but it's what he'd show his parents — point the camera, ask naturally, no interface to learn."
+        }
+      ],
+      "takeaways": [
+        "<b>Advanced Voice + camera</b> = point at the world and ask.",
+        "Likely <b>~1 image/second</b> under the hood, but feels like live video.",
+        "Effortless and natural — the best entry point for non-technical users."
+      ],
+      "exercises": [
+        {
+          "t": "Give it a tour",
+          "p": "Open voice + camera and pan around a room, asking it to identify objects, read a label, or estimate a measurement.",
+          "hint": "Notice how it keeps up “live.” That's fast image sampling feeling like streaming video."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "How does “video input” most likely work today?",
+          "opts": [
+            "True continuous video understanding",
+            "Sampling roughly one image per second",
+            "Reading only audio",
+            "Uploading the whole video file first"
+          ],
+          "correct": 1,
+          "why": "Karpathy suspects it samples periodic frames (~1/sec) rather than consuming continuous video — though it feels seamless to the user."
+        },
+        {
+          "type": "flash",
+          "q": "Who is video input especially good for?",
+          "a": "Non-technical users — you just point the camera and talk. No interface to learn, which makes it the most natural on-ramp to LLMs."
+        }
+      ]
+    },
+    {
+      "id": "video-output",
+      "part": 4,
+      "time": "1:47:12",
+      "title": "Generate video",
+      "tagline": "Text-to-video is incredible and evolving fast — a quick look, not a deep dive.",
+      "mental": "The last modality: <b>text-to-video</b> (Sora, Veo, and many others). Karpathy keeps this brief — he doesn't use it in his own work — but flags it as remarkable and moving extremely fast. Worth knowing it exists and roughly where the frontier is.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "He shows a comparison tweet: many video models all asked to generate \"a tiger in the jungle.\" All quite good; Veo&nbsp;2 near state-of-the-art at the time."
+        },
+        {
+          "t": "fig",
+          "src": "sora-tiger.jpg",
+          "url": "Sora / Veo",
+          "alt": "A generated video still of a white tiger walking through a jungle",
+          "cap": "<b>Prompt → video.</b> The same “tiger in the jungle” across models — each with its own style and quality. The field is evolving month to month."
+        },
+        {
+          "t": "callout",
+          "k": "tip",
+          "title": "Know it exists; expect churn",
+          "h": "Different tools, different styles and quality, all improving fast. Unless you're in a creative field, it's enough to know the capability is here and improving — and to compare a couple when you need it."
+        }
+      ],
+      "takeaways": [
+        "<b>Text-to-video</b> exists and is advancing very fast (Sora, Veo, …).",
+        "Quality/style vary by model — compare when you need it.",
+        "Not part of Karpathy's daily workflow; know it's there."
+      ],
+      "exercises": [
+        {
+          "t": "Sample the frontier",
+          "p": "If you have access, prompt one text-to-video tool with a simple scene and note the quality and quirks.",
+          "hint": "This modality changes fastest of all — treat anything you see as a snapshot in time."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "flash",
+          "q": "How much weight does Karpathy give text-to-video?",
+          "a": "A light touch — it's impressive and fast-moving, but not something he uses in his own (non-creative) work. Know it exists and where the frontier roughly is."
+        }
+      ]
+    },
+    {
+      "id": "memory",
+      "part": 5,
+      "time": "1:48:19",
+      "title": "Memory",
+      "tagline": "A private database about you, quietly prepended to every conversation.",
+      "mental": "Every chat normally starts from an empty window and is wiped when you leave. <b>Memory</b> is the exception: ChatGPT can save little facts about you into a separate <b>memory bank</b> that is <b>prepended to all future conversations</b>. Let it run and it gradually gets to know you — and its answers (movie picks, especially) get more relevant. Sometimes it saves automatically; often you just ask it to remember.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "He tells ChatGPT his (strong) opinion about the “peak” era of Hollywood, agrees with its take, then asks it to remember — and a “Memory updated” banner appears."
+        },
+        {
+          "t": "fig",
+          "src": "memory-updated.jpg",
+          "url": "chatgpt.com",
+          "alt": "ChatGPT showing a 'Memory updated' banner after saving a preference",
+          "cap": "<b>“Memory updated.”</b> A short summary of what it learned about you is written to the memory bank — and that bank rides along at the start of every future chat."
+        },
+        {
+          "t": "quote",
+          "ts": "1:50:20",
+          "h": "ChatGPT wrote a little summary of what it learned about me as a person and recorded this text in its memory bank… a database of knowledge about you, always prepended to all the conversations so that the model has access to it."
+        },
+        {
+          "t": "callout",
+          "k": "tip",
+          "title": "You can invoke and edit it",
+          "h": "If it doesn't save automatically, say “please remember this.” You can also <b>view, edit, add, and delete</b> memories in settings — it's just a list of text strings. Karpathy finds it makes ChatGPT's movie recommendations noticeably better over time."
+        },
+        {
+          "t": "callout",
+          "k": "model",
+          "title": "Mostly a ChatGPT thing",
+          "h": "As of filming, memory is largely unique to ChatGPT. It's a quality-of-life layer on top of the zip file — not new intelligence, just persistent context that saves you re-explaining yourself."
+        }
+      ],
+      "takeaways": [
+        "Memory = a <b>personal text database prepended to every chat</b>.",
+        "Saved <b>automatically sometimes</b>; otherwise just ask it to remember.",
+        "You can <b>view / edit / delete</b> memories.",
+        "It makes answers more personal over time (e.g. recommendations)."
+      ],
+      "exercises": [
+        {
+          "t": "Teach it one thing",
+          "p": "Tell ChatGPT a durable preference and say “remember this.” Start a fresh chat and see if it acts on it.",
+          "hint": "That persistence across a wiped window is the whole feature — context that survives “new chat.”"
+        },
+        {
+          "t": "Audit your memories",
+          "p": "Open the memory manager and read what it has saved. Delete anything stale or wrong.",
+          "hint": "It's just a list of strings you fully control — worth a periodic clean-up."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "How does memory reach the model in a brand-new chat?",
+          "opts": [
+            "It retrains the model on you",
+            "The memory bank's text is prepended to the conversation",
+            "It searches the web for you",
+            "It lives only on your phone"
+          ],
+          "correct": 1,
+          "why": "Memories are stored as text and inserted at the start of each conversation, so the model “knows” them without any retraining."
+        },
+        {
+          "type": "flash",
+          "q": "Two ways a memory gets saved?",
+          "a": "Automatically (the model decides something is worth keeping) or explicitly (you say “remember this”). Either way you can later view and edit the list."
+        }
+      ]
+    },
+    {
+      "id": "custom-instructions",
+      "part": 5,
+      "time": "1:52:14",
+      "title": "Custom instructions",
+      "tagline": "Set, once and globally, how it should talk to you — tone, identity, defaults.",
+      "mental": "Custom instructions are standing orders applied to <b>every</b> conversation. Tell it your preferred tone (\"don't be an HR business partner — just talk to me normally\"), who you are, and any defaults you always want. It's the cheapest way to stop repeating yourself and to bend the model's generic voice toward what you actually like.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "In Settings → Customize ChatGPT, he sets the traits he wants (\"be educational whenever you can\"), a bit about his identity, and a specific default: since he's learning Korean, it should use a particular level of formality unless told otherwise."
+        },
+        {
+          "t": "fig",
+          "src": "custom-instructions.jpg",
+          "url": "chatgpt.com · Settings",
+          "alt": "The 'Customize ChatGPT' custom-instructions dialog",
+          "cap": "<b>Standing orders.</b> Traits, identity, and defaults that apply to every chat — e.g. “use this tone of formality for Korean by default.”"
+        },
+        {
+          "t": "quote",
+          "ts": "1:52:36",
+          "h": "I just kind of told it: don't be like an HR business partner, just talk to me normally. And also, I love explanations, educations, insights — so be educational whenever you can."
+        },
+        {
+          "t": "callout",
+          "k": "tip",
+          "title": "Great for language-learning defaults",
+          "h": "His Korean example is instructive: without a default, it flip-flops between too-formal and too-casual. One custom instruction pins the register he wants — a small setting that removes a recurring annoyance from every future reply."
+        }
+      ],
+      "takeaways": [
+        "Custom instructions apply <b>globally, to every conversation</b>.",
+        "Set <b>tone, identity, and defaults</b> once.",
+        "Kills repetitive re-explaining and tames the generic voice.",
+        "Most other LLMs have an equivalent — look in settings."
+      ],
+      "exercises": [
+        {
+          "t": "Fix the voice",
+          "p": "Write one custom instruction about tone (e.g. “be direct, skip the corporate hedging, be educational”). Feel the difference in the next reply.",
+          "hint": "This is the highest-leverage setting most people never touch."
+        },
+        {
+          "t": "Pin a default",
+          "p": "Add a default you always want (units, language register, format). Confirm it holds across a new chat.",
+          "hint": "His Korean-formality default is the template — encode the thing you keep re-specifying."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "flash",
+          "q": "How are custom instructions different from memory?",
+          "a": "Custom instructions are deliberate, global standing orders you write (tone, identity, defaults). Memory is an evolving, mostly-automatic database of facts about you. Both get prepended to chats; one you author, one accumulates."
+        },
+        {
+          "type": "mcq",
+          "q": "Best use of a custom instruction?",
+          "opts": [
+            "Asking a one-off question",
+            "Encoding a preference you'd otherwise repeat every chat",
+            "Uploading a document",
+            "Running code"
+          ],
+          "correct": 1,
+          "why": "Custom instructions shine for anything you'd say in every conversation — tone, defaults, who you are — so you set it once instead of restating it."
+        }
+      ]
+    },
+    {
+      "id": "custom-gpts",
+      "part": 5,
+      "time": "1:53:33",
+      "title": "Custom GPTs",
+      "tagline": "Save a reusable prompt once — especially a few-shot one — and run it forever.",
+      "mental": "A custom GPT is, underneath, just <b>a saved prompt</b>. If you keep pasting the same instructions, bottle them into a GPT once; then you only supply the changing part (a sentence, an image). The pro move inside it: give <b>examples</b>, not just a description — a <b>few-shot prompt</b> reliably beats a bare instruction. Karpathy's are almost all for language learning.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "His \"Korean Vocabulary Extractor\" takes a sentence and returns dictionary-form vocab as <code>Korean;English</code> pairs, ready to paste into Anki. Under the hood it's pure prompting — background, instructions, and four worked examples."
+        },
+        {
+          "t": "fig",
+          "src": "korean-gpt.jpg",
+          "url": "chatgpt.com · GPTs",
+          "alt": "A custom GPT that extracts Korean vocabulary from a sentence",
+          "cap": "<b>A saved prompt with a name.</b> Feed it a sentence, get flashcard-ready vocabulary — no need to re-describe the task each time."
+        },
+        {
+          "t": "quote",
+          "ts": "1:55:21",
+          "h": "What I'm doing here really is I'm constructing what's called a few-shot prompt… I'm giving it a few examples, and I find that this always increases the accuracy of LLMs."
+        },
+        {
+          "t": "p",
+          "h": "His \"Korean Detailed Translator\" goes further — full translation plus a part-by-part breakdown you can ask follow-ups on — and he argues it beats Google Translate outright. A third, \"Korean Cap,\" takes a screenshot of baked-in subtitles, OCRs it, translates, and breaks it down: images + OCR + translation + a saved prompt, tied together."
+        },
+        {
+          "t": "fig",
+          "src": "korean-subtitle.jpg",
+          "url": "chatgpt.com · GPTs",
+          "alt": "A custom GPT OCR-ing and translating a Korean TV subtitle screenshot",
+          "cap": "<b>Everything at once.</b> Screenshot → OCR → translate → break down. One custom GPT chaining several capabilities you've now met."
+        },
+        {
+          "t": "quote",
+          "ts": "1:56:08",
+          "h": "What this feature really is, is that it's just saving you prompting time. If there's a certain prompt that you keep reusing… just create a custom ChatGPT, save that prompt a single time."
+        },
+        {
+          "t": "callout",
+          "k": "tip",
+          "title": "Few-shot beats zero-shot",
+          "h": "Describing a task is “zero-shot.” Adding a few concrete input→output examples is “few-shot,” and it reliably lifts accuracy — the same way you'd <em>show</em> a person how to do a task rather than only explaining it. Wrap examples in clear delimiters (he uses XML-like tags) so the model sees where each begins and ends."
+        }
+      ],
+      "takeaways": [
+        "A custom GPT is a <b>reusable saved prompt</b> — set it once.",
+        "Supply only the <b>changing input</b> each time.",
+        "<b>Few-shot</b> (examples) beats bare instructions — use clear delimiters.",
+        "They can <b>chain capabilities</b> (image + OCR + translate) into one tool."
+      ],
+      "exercises": [
+        {
+          "t": "Bottle a repeated prompt",
+          "p": "Find a prompt you reuse. Turn it into a custom GPT with clear instructions and 2–4 worked examples.",
+          "hint": "The examples are the point — that's what makes it few-shot and reliable."
+        },
+        {
+          "t": "Zero-shot vs few-shot",
+          "p": "Run the same task with just a description, then with three examples added. Compare accuracy and consistency.",
+          "hint": "This is the single most transferable prompting lesson in the talk."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "What is a custom GPT, fundamentally?",
+          "opts": [
+            "A newly trained model",
+            "A saved, reusable prompt (ideally few-shot)",
+            "A web search tool",
+            "A memory database"
+          ],
+          "correct": 1,
+          "why": "Nothing special happens under the hood — it's your instructions (plus examples) saved once, so you only provide the changing input thereafter."
+        },
+        {
+          "type": "flash",
+          "q": "Why does adding examples (“few-shot”) help?",
+          "a": "Showing input→output pairs teaches the task far more precisely than describing it. Like teaching a person by demonstration, few-shot reliably raises accuracy over zero-shot instructions."
+        }
+      ]
+    },
+    {
+      "id": "the-whole-zoo",
+      "part": 6,
+      "time": "2:01:34",
+      "title": "The whole zoo — a working checklist",
+      "tagline": "Zoom all the way out. Here is the complete map, and the questions to ask every time.",
+      "mental": "Step back and the whole talk collapses into one growing diagram and one checklist. There's a <b>rapidly shifting ecosystem</b> of LLM apps; ChatGPT is the feature-rich incumbent, but each rival wins somewhere. Your job in any moment is to run down a short list: which <b>model/tier</b>, do I need <b>thinking</b>, which <b>tools</b>, which <b>modality</b>, and which <b>quality-of-life</b> features — on <b>web or phone</b>.",
+      "blocks": [
+        {
+          "t": "lead",
+          "h": "This is the diagram Karpathy has been building the entire time — the zip file, then thinking, then tools, then modalities, then quality-of-life features. Seeing it whole is the point of the course."
+        },
+        {
+          "t": "fig",
+          "src": "diagram-final.jpg",
+          "url": "excalidraw.com",
+          "alt": "Karpathy's complete cartoon diagram of the LLM ecosystem",
+          "cap": "<b>The finished cartoon.</b> Everything in one frame: the model, tool use, every modality, and the quality-of-life layer. Re-read it and each piece should now have a section behind it."
+        },
+        {
+          "t": "quote",
+          "ts": "2:01:48",
+          "h": "There is a rapidly growing, changing, shifting, and thriving ecosystem of LLM apps like ChatGPT. ChatGPT is the first and the incumbent and is probably the most feature-rich… but all the other ones are very rapidly growing."
+        },
+        {
+          "t": "callout",
+          "k": "tip",
+          "title": "The checklist — ask these every time",
+          "h": "<b>1) The zip file:</b> you're talking to a lossy compression of the internet. <b>2) Tier/model:</b> know which brain you're using. <b>3) Thinking?</b> hard math/code → switch to a reasoning model. <b>4) Tools:</b> fresh info → search; deep dive → deep research; numbers/plots → Python/ADA; prototypes/diagrams → Artifacts; real code → Cursor. <b>5) Modality:</b> speak, listen, show images, point the camera. <b>6) Quality of life:</b> memory, custom instructions, custom GPTs. <b>7) Surface:</b> a feature may exist on web but not phone, or vice-versa."
+        },
+        {
+          "t": "table",
+          "head": [
+            "When you need…",
+            "Reach for"
+          ],
+          "rows": [
+            [
+              "Fresh, niche, or changing facts",
+              "Internet search (Perplexity / ChatGPT search)"
+            ],
+            [
+              "A deep, cited survey of a topic",
+              "Deep research (10-min report — verify it)"
+            ],
+            [
+              "To understand a paper or book",
+              "Upload / paste it, read it together"
+            ],
+            [
+              "Exact math, or figures & plots",
+              "Python interpreter / Advanced Data Analysis"
+            ],
+            [
+              "A quick app or a concept diagram",
+              "Claude Artifacts"
+            ],
+            [
+              "Serious, multi-file coding",
+              "Cursor + Composer (vibe coding)"
+            ],
+            [
+              "Hands-free input or a natural demo",
+              "Voice / Advanced Voice / camera"
+            ],
+            [
+              "It to remember or match your style",
+              "Memory + custom instructions"
+            ],
+            [
+              "A repeated task done consistently",
+              "A few-shot custom GPT"
+            ]
+          ]
+        },
+        {
+          "t": "callout",
+          "k": "verify",
+          "title": "The one rule under all of it",
+          "h": "Native beats tacked-on; tools beat bare recall; and <b>everything is a first draft.</b> The model — even with search, even with deep research — can hallucinate. Keep the citations, read the code, check the box. That habit is what separates using LLMs well from being misled by them."
+        },
+        {
+          "t": "quote",
+          "ts": "2:05:52",
+          "h": "All of this is a little bit of a zoo. It's a little bit crazy — but these are the kinds of features that exist."
+        }
+      ],
+      "takeaways": [
+        "The whole talk = <b>one growing diagram</b> + <b>one checklist</b>.",
+        "Run the list: <b>zip file → tier → thinking → tools → modality → QoL → surface</b>.",
+        "ChatGPT is the feature-rich incumbent; rivals each win somewhere — keep a council.",
+        "Under everything: <b>tools beat recall, native beats tacked-on, verify everything.</b>"
+      ],
+      "exercises": [
+        {
+          "t": "Run the checklist for real",
+          "p": "Take a task you'll actually do today and walk the 7-step checklist out loud: which model, thinking or not, which tool, which modality, which QoL feature, web or phone.",
+          "hint": "Doing this deliberately a few times turns the whole course into a reflex."
+        },
+        {
+          "t": "Teach it back",
+          "p": "Without looking, redraw the growing diagram from memory: zip file → thinking → tools → modalities → quality-of-life. Fill in one example per branch.",
+          "hint": "If you can reconstruct the diagram, you own the material. Gaps show you which section to revisit."
+        }
+      ],
+      "quiz": [
+        {
+          "type": "mcq",
+          "q": "A rival app added internet search. Why might Karpathy still switch tools per task?",
+          "opts": [
+            "Loyalty to one brand",
+            "Each app has different strengths — search here, artifacts there, voice elsewhere",
+            "Because feature parity never matters",
+            "To avoid using ChatGPT"
+          ],
+          "correct": 1,
+          "why": "He treats the apps as a toolkit: Perplexity for search, Claude for artifacts/diagrams, ChatGPT for voice/deep-research, Grok when others are too cagey. Right tool per job."
+        },
+        {
+          "type": "flash",
+          "q": "Compress the entire course into one sentence.",
+          "a": "You're steering a lossy zip file of the internet — pick the right model and tier, let it think when the problem is hard, hand it tools and modalities to break out of the box, personalize it, and verify everything it tells you."
+        }
+      ]
+    }
+  ]
+}

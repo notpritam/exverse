@@ -37,7 +37,11 @@ end-of-step Q&A, and progress that follows you. Polished and shareable enough to
 
 ## Delivery phases (build in order; each ships + commits independently)
 - **Phase 0 — Foundation ✅ SHIPPED.** Next.js 15 App Router + TS + Tailwind + design system + light/dark themes. Content-as-code; ported the LLMs course (25 lessons, 44 frames). **Roadmap-is-home** interactive map + lesson pages (passage + screens + end-of-step Q&A). Local-first progress (todo/doing/done, DB-ready). All pages static-prerendered for instant nav. Dynamic OG/SEO. Open-source scaffold (MIT, README, CONTRIBUTING). Deploy-ready (Vercel). Verified end-to-end in-browser.
-- **Phase 1 — Accounts & sync.** Custom auth (username/password + crypto recovery key) · Prisma + Postgres (non-Supabase) · per-user progress, merge local→account · **roles** foundation.
+- **Phase 1 — Accounts & sync** (NEXT). Custom auth (username/password + crypto recovery key) · **MongoDB** (user-provided; replaces the earlier Prisma/Postgres plan) · logged-in state (header shows user, sign in/out) · per-user progress, merge local→account · **roles** foundation. Needs `MONGODB_URI` + `AUTH_SESSION_SECRET`.
+
+### UI redesign (done, live)
+- ✅ **Udemy-style course player**: persistent curriculum sidebar + full-width lessons (no more narrow column).
+- ✅ **Remotion interactive explainers** — 7 in varied styles (token cells, search flow, compress particles, reasoning-chain comparison, bar chart, terminal typewriter, radial hub); custom player controls (play/pause, restart, ±1s, scrub). Full-width landing with a live explainer.
 - **Phase 2 — AI tutor agents.** In-lesson grounded tutor + quiz-me/explain-this (LLM API + retrieval).
 - **Phase 3 — Difficulty tracks & richer roadmap.** Beginner/intermediate/advanced gating; multiple tracks per course.
 - **Phase 4 — Agentic course-building.** author→fact-check→quiz→edit pipeline to add new courses at scale.

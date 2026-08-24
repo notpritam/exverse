@@ -245,6 +245,11 @@ body {
   .rm-node::after { left: -25px !important; right: auto !important; width: 25px; }
 }
 
+/* explainer scrubber */
+.exv-scrub { appearance: none; -webkit-appearance: none; height: 4px; border-radius: 99px; }
+.exv-scrub::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 13px; height: 13px; border-radius: 99px; background: var(--zip); cursor: pointer; border: 2px solid var(--panel); }
+.exv-scrub::-moz-range-thumb { width: 13px; height: 13px; border-radius: 99px; background: var(--zip); border: 2px solid var(--panel); cursor: pointer; }
+
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }

@@ -13,8 +13,20 @@ const ANIMS: Record<string, { at: number; block: Block }[]> = {
   "context-window": [
     { at: 1, block: { t: "anim", name: "token-stream", cap: "You and the model take turns filling the context window." } },
   ],
+  "thinking-models": [
+    { at: 2, block: { t: "anim", name: "thinking", cap: "Fast answers are instant but can be wrong; thinking reasons it out." } },
+  ],
+  "models-and-tiers": [
+    { at: 2, block: { t: "anim", name: "pricing", cap: "The tier you pay for decides which brain answers you." } },
+  ],
   "internet-search": [
     { at: 1, block: { t: "anim", name: "tool-use", cap: "The model searches, loads the pages into context, then answers." } },
+  ],
+  "python-interpreter": [
+    { at: 2, block: { t: "anim", name: "python", cap: "It writes a program, runs it, and reads back the exact result." } },
+  ],
+  "audio-input": [
+    { at: 1, block: { t: "anim", name: "modalities", cap: "Beyond text: audio, images, and video — native or tacked-on." } },
   ],
 };
 

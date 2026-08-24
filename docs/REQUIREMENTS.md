@@ -36,7 +36,7 @@ end-of-step Q&A, and progress that follows you. Polished and shareable enough to
 - ✅ **Agentic course-building pipeline**: author → fact-checker → quiz-writer → editor agents that turn a source (e.g. a video/transcript) into a course — i.e. productize how the Karpathy course was made by hand.
 
 ## Delivery phases (build in order; each ships + commits independently)
-- **Phase 0 — Foundation (build now).** Next.js App Router + TS + Tailwind + design system + themes. Content-as-code; port the LLMs course. **Roadmap-is-home** interactive map + lesson pages (passage + screens + end-of-step Q&A). Local-first progress (DB-ready). SSR/SEO/OG/share. Open-source scaffold. Deploy-ready. → complete, shippable, trend-worthy on its own.
+- **Phase 0 — Foundation ✅ SHIPPED.** Next.js 15 App Router + TS + Tailwind + design system + light/dark themes. Content-as-code; ported the LLMs course (25 lessons, 44 frames). **Roadmap-is-home** interactive map + lesson pages (passage + screens + end-of-step Q&A). Local-first progress (todo/doing/done, DB-ready). All pages static-prerendered for instant nav. Dynamic OG/SEO. Open-source scaffold (MIT, README, CONTRIBUTING). Deploy-ready (Vercel). Verified end-to-end in-browser.
 - **Phase 1 — Accounts & sync.** Custom auth (username/password + crypto recovery key) · Prisma + Postgres (non-Supabase) · per-user progress, merge local→account · **roles** foundation.
 - **Phase 2 — AI tutor agents.** In-lesson grounded tutor + quiz-me/explain-this (LLM API + retrieval).
 - **Phase 3 — Difficulty tracks & richer roadmap.** Beginner/intermediate/advanced gating; multiple tracks per course.

@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================================
+   DESIGN TOKENS — light (default) + dark. Swapped via [data-theme].
+   Pedagogy accents are stable across the platform:
+   zip=model/knowledge · think=thinking · tool=tools · verify=caveat
+   ============================================================= */
+:root,
+[data-theme="light"] {
+  --paper: #fbfaf4;
+  --paper-2: #f3f1e6;
+  --panel: #ffffff;
+  --ink: #17160f;
+  --ink-soft: #3b3a31;
+  --muted: #6d6a5a;
+  --faint: #97927e;
+  --line: #e4e0d0;
+  --line-soft: #eeebde;
+
+  --zip: #c67b22;        --zip-wash: #f8ecd8;
+  --think: #1e7a66;      --think-wash: #e0efe9;
+  --tool: #6338ce;       --tool-wash: #ece6fb;
+  --verify: #b23a22;     --verify-wash: #f8e6df;
+  --tip: #2c5aa8;        --tip-wash: #e4ecf7;
+
+  --grid: rgba(23, 22, 15, 0.05);
+  --shadow-color: 23 22 15;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --paper: #0e0e0b;
+  --paper-2: #17171200;
+  --paper-2: #171612;
+  --panel: #1b1a15;
+  --ink: #f5f2e8;
+  --ink-soft: #d8d3c2;
+  --muted: #a29c88;
+  --faint: #6f6a59;
+  --line: #2b2a22;
+  --line-soft: #221f19;
+
+  --zip: #e5a24a;        --zip-wash: #2a2113;
+  --think: #4fbfa3;      --think-wash: #12241f;
+  --tool: #a98bf5;       --tool-wash: #1d1730;
+  --verify: #e9765a;     --verify-wash: #2a1712;
+  --tip: #7fa8e8;        --tip-wash: #131d2c;
+
+  --grid: rgba(245, 242, 232, 0.05);
+  --shadow-color: 0 0 0;
+  color-scheme: dark;
+}
+
+/* ---------- base ---------- */
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; scroll-padding-top: 84px; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 18px;
+  line-height: 1.68;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: var(--zip); color: #fff; }
+
+/* graph-paper wash, theme-aware */
+.bg-grid::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(circle at 50% 24%, #000, transparent 82%);
+  mask-image: radial-gradient(circle at 50% 24%, #000, transparent 82%);
+}
+
+@layer base {
+  h1, h2, h3, h4 { font-family: var(--font-display), system-ui, sans-serif; font-weight: 600; line-height: 1.12; letter-spacing: -0.015em; color: var(--ink); }
+}
+
+@layer utilities {
+  .font-display { font-family: var(--font-display), system-ui, sans-serif; }
+  .font-serif { font-family: var(--font-serif), Georgia, serif; }
+  .font-mono { font-family: var(--font-mono), monospace; }
+  .shadow-card { box-shadow: 0 1px 2px rgb(var(--shadow-color) / 0.05), 0 10px 34px -18px rgb(var(--shadow-color) / 0.28); }
+  .shadow-float { box-shadow: 0 30px 70px -40px rgb(var(--shadow-color) / 0.5); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

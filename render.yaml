@@ -7,7 +7,7 @@ services:
   - type: web
     name: exverse
     runtime: node
-    plan: free
+    plan: starter          # paid, always-on (no cold starts / idle spin-down)
     region: oregon
     branch: main
     buildCommand: npm ci && npm run build

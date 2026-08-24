@@ -35,7 +35,14 @@ npm run build && npm start
 
 ## Deploy
 
-Zero-config on **Vercel** (`next build`). Any Node host works; static content is served from the edge.
+**Render** (blueprint included). Push this repo to GitHub, then in Render → **New → Blueprint** → pick the
+repo. [`render.yaml`](./render.yaml) provisions a Node **web service** (SSR + dynamic OG images):
+
+- Build: `npm ci && npm run build`
+- Start: `npm start` (Next reads Render's `$PORT`)
+- Node pinned by [`.node-version`](./.node-version)
+
+Also works zero-config on **Vercel** (`next build`) or any Node host.
 
 ## Add a course
 

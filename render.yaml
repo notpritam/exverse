@@ -1,0 +1,20 @@
+# Render Blueprint — deploy Exverse as a Node web service (SSR).
+# Web service (not Static Site) so server rendering + dynamic OG images work,
+# and so Phase 1 auth/API has a server. Render injects $PORT; `next start` reads it.
+#
+# Deploy: push this repo to GitHub, then in Render → New → Blueprint → pick the repo.
+services:
+  - type: web
+    name: exverse
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Phase 1 (accounts) will add: DATABASE_URL, AUTH_SESSION_SECRET

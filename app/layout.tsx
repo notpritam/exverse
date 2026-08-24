@@ -23,7 +23,10 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
-const SITE = "https://exverse.dev";
+// Prefer an explicit URL; fall back to Render's injected URL, then a placeholder.
+// Set NEXT_PUBLIC_SITE_URL in Render for correct OG/canonical links.
+const SITE =
+  process.env.NEXT_PUBLIC_SITE_URL || process.env.RENDER_EXTERNAL_URL || "https://exverse.dev";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),

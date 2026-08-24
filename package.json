@@ -4,6 +4,9 @@
   "private": true,
   "description": "Exverse — an open-source place to learn something. Interactive-roadmap courses.",
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

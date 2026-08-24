@@ -19,4 +19,10 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      # Phase 1 (accounts) will add: DATABASE_URL, AUTH_SESSION_SECRET
+      # Phase 1 accounts — set these in the Render dashboard (not committed):
+      - key: MONGODB_URI
+        sync: false
+      - key: AUTH_SESSION_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false

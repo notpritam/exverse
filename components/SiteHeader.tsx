@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
+import AccountMenu from "./AccountMenu";
 
 export default function SiteHeader() {
   return (
@@ -34,6 +35,7 @@ export default function SiteHeader() {
           </svg>
           Star
         </a>
+        <AccountMenu />
         <ThemeToggle />
       </div>
     </header>

@@ -26,6 +26,31 @@ function write(s: Store) {
   } catch {}
 }
 
+async function pushStore(): Promise<Store | null> {
+  try {
+    const r = await fetch("/api/progress", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ progress: read() }),
+    });
+    if (!r.ok) return null;
+    return (await r.json()).progress as Store;
+  } catch {
+    return null;
+  }
+}
+
+/** After login: push local progress up, pull the merged result back down. */
+export async function syncProgress() {
+  const merged = await pushStore();
+  if (merged) {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(merged));
+    } catch {}
+    window.dispatchEvent(new CustomEvent("exverse:progress"));
+  }
+}
+
 export function useProgress(courseSlug: string, total: number) {
   const [map, setMap] = useState<Record<string, NodeStatus>>({});
   const [ready, setReady] = useState(false);
@@ -55,6 +80,10 @@ export function useProgress(courseSlug: string, total: number) {
       course[nodeId] = status;
       write({ ...all, [courseSlug]: course });
       setMap(course);
+      // write-through to the account when logged in
+      if (typeof window !== "undefined" && (window as { __exvAuthed?: boolean }).__exvAuthed) {
+        void pushStore();
+      }
     },
     [courseSlug]
   );
